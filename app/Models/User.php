@@ -21,6 +21,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
+        'document_number',
+        'is_active',
     ];
 
     /**
@@ -34,7 +37,7 @@ class User extends Authenticatable
     ];
 
     /**
-     * Get the attributes that should be cast.
+     * The attributes that should be cast.
      *
      * @return array<string, string>
      */
@@ -43,6 +46,22 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
         ];
+    }
+
+    public function inspections_as_inspector()
+    {
+        return $this->hasMany(Inspeccion::class, 'inspector_id');
+    }
+
+    public function inspections_as_participant()
+    {
+        return $this->hasMany(Inspeccion::class, 'participant_id');
+    }
+
+    public function signatures()
+    {
+        return $this->hasMany(Firma::class, 'user_id');
     }
 }

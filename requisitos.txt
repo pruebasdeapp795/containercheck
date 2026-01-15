@@ -1,0 +1,278 @@
+1. Información general
+
+Nombre del proyecto:
+Sistema Web de Inspecciones
+
+Cliente:
+[Nombre de la empresa]
+
+Proveedor:
+Antigravity
+
+Objetivo del proyecto:
+Desarrollar un sistema web que permita gestionar inspecciones estructuradas por fases, con campos dinámicos, firmas digitales, control de usuarios por rol y descarga de documentos.
+
+2. Alcance del proyecto
+
+El sistema permitirá:
+
+Autenticación de usuarios por rol
+
+Creación y gestión de inspecciones
+
+Definición de fases y campos personalizados
+
+Ejecución de reglas condicionales en formularios
+
+Firma digital de inspecciones
+
+Descarga de documentos en PDF
+
+El sistema será responsive y accesible desde desktop y tablet.
+
+3. Roles y perfiles de usuario
+3.1 Administrador
+
+Responsable de la configuración y administración del sistema.
+
+3.2 Inspector
+
+Responsable de ejecutar y completar las inspecciones.
+
+3.3 Personal participante
+
+Responsable de firmar la inspección como parte involucrada.
+
+4. Funcionalidades por rol
+4.1 Administrador
+4.1.1 Autenticación
+
+Login con usuario y contraseña
+
+Cambio de contraseña
+
+4.1.2 Gestión de usuarios
+
+Crear usuarios
+
+Asignar roles
+
+Habilitar / deshabilitar usuarios
+
+Restablecer contraseñas
+
+4.1.3 Gestión de fases
+
+El sistema permitirá crear y administrar fases con los siguientes atributos:
+
+Nombre
+
+Orden
+
+Descripción (opcional)
+
+Estado (activa / inactiva)
+
+4.1.4 Gestión de campos personalizados
+
+Los campos estarán asociados a una fase y deberán permitir configurar:
+
+Tipo de campo:
+
+Texto
+
+Selección (Sí / No u opciones)
+
+Campo obligatorio (sí / no)
+
+Reglas condicionales:
+
+Si la respuesta es NO, deshabilitar otros campos
+
+Validaciones en tiempo real
+
+Confirmación al enviar fase:
+
+“¿Está seguro de continuar? Esta acción guardará la fase y finalizará la inspección.”
+
+4.1.5 Descargas
+
+Descargar formato en blanco (PDF)
+
+Nota: El módulo de informes avanzados no está incluido en esta fase.
+
+4.1.6 QR de carga
+
+El sistema debe quedar preparado para integrar un módulo de QR en el futuro
+
+No se desarrollará funcionalmente en esta etapa
+
+4.2 Inspector
+4.2.1 Autenticación
+
+Login con usuario y contraseña
+
+4.2.2 Gestión de inspecciones
+
+Crear una nueva inspección
+
+Retomar inspecciones existentes
+
+Seleccionar la fase a continuar
+
+Diligenciar y guardar información por fase
+
+4.2.3 Firmas
+
+Firmar digitalmente la inspección al finalizar
+
+La firma se realizará mediante canvas (mouse o touch)
+
+4.2.4 Descargas
+
+Descargar inspección finalizada en PDF
+
+Descargar formato en blanco
+
+Condición:
+La descarga solo estará disponible cuando:
+
+Inspector y personal participante hayan firmado
+
+4.3 Personal participante
+4.3.1 Autenticación
+
+Usuario: número de documento
+
+Contraseña: número de documento
+
+4.3.2 Creación automática de usuario
+
+El usuario se creará automáticamente desde la fase:
+
+Fase 04 – Personal participante
+
+4.3.3 Funcionalidades
+
+Firmar inspección
+
+Descargar inspección finalizada (si aplica)
+
+4.3.4 Regla de tiempo
+
+El personal participante tendrá 24 horas para firmar
+
+Si no firma en ese plazo:
+
+La inspección se cerrará automáticamente por vencimiento
+
+5. Fases del sistema
+Fases predeterminadas
+
+Fase 01 – Información del conductor
+
+Fase 02 – Información del vehículo
+
+Fase 03 – Inspección de la unidad de carga
+
+Fase 04 – Personal participante
+
+Las fases:
+
+Se ejecutan en orden
+
+Pueden ser retomadas si no están finalizadas
+
+6. Estados de la inspección
+
+El sistema manejará los siguientes estados:
+
+Borrador
+
+En progreso
+
+Pendiente de firma
+
+Finalizada
+
+Finalizada por vencimiento
+
+7. Firmas digitales
+
+Firma del inspector
+
+Firma del personal participante
+
+La inspección será considerada válida solo cuando ambas firmas estén registradas
+
+Las firmas deben persistirse y mostrarse en el documento final
+
+8. Documentos (PDF)
+
+El sistema debe generar:
+
+Formato en blanco
+
+Inspección finalizada
+
+Los documentos deberán:
+
+Mantener estructura consistente
+
+Incluir información diligenciada
+
+Incluir firmas cuando aplique
+
+9. Reglas de negocio clave
+
+No se puede avanzar si hay campos obligatorios sin completar
+
+Las reglas condicionales deben ejecutarse en tiempo real
+
+Confirmación obligatoria al cerrar una fase
+
+No permitir descarga sin firmas completas
+
+10. Requisitos técnicos (alto nivel)
+
+Backend: Laravel 11
+
+Base de datos relacional
+
+Frontend web responsive
+
+Control de roles y permisos
+
+Firma digital con canvas
+
+Generación de PDF
+
+11. Fuera de alcance
+
+Reportes avanzados
+
+Integraciones externas
+
+QR funcional
+
+12. Entregables esperados
+
+Aplicación web funcional
+
+Código fuente
+
+Base de datos estructurada
+
+Documentación técnica básica
+
+Manual de uso
+
+13. Criterio de aceptación
+
+El proyecto se considerará completo cuando:
+
+Todas las funcionalidades descritas estén operativas
+
+El sistema permita ejecutar una inspección completa de inicio a fin
+
+Se puedan generar y descargar documentos correctamente
