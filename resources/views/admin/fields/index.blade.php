@@ -29,9 +29,9 @@
                     <th class="w-1/4 text-left py-3 px-4 uppercase font-semibold text-sm">Acciones</th>
                 </tr>
             </thead>
-            <tbody class="text-gray-700">
+            <tbody class="text-gray-700" id="fields-table-body">
                 @forelse($fields as $field)
-                    <tr class="border-b hover:bg-gray-100">
+                    <tr class="border-b hover:bg-gray-100 cursor-move" data-id="{{ $field->id }}">
                         <td class="text-left py-3 px-4">{{ $field->order }}</td>
                         <td class="text-left py-3 px-4 font-bold">{{ $field->label }}</td>
                         <td class="text-left py-3 px-4">
@@ -65,4 +65,35 @@
             </tbody>
         </table>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var el = document.getElementById('fields-table-body');
+            Sortable.create(el, {
+                animation: 150,
+                onEnd: function () {
+                    var ids = [];
+                    el.querySelectorAll('tr[data-id]').forEach(function (row) {
+                        ids.push(row.getAttribute('data-id'));
+                    });
+
+                    if (ids.length > 0) {
+                        fetch('{{ route('admin.fields.reorder') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            body: JSON.stringify({ ids: ids })
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                console.log('Orden actualizado');
+                            });
+                    }
+                }
+            });
+        });
+    </script>
 @endsection

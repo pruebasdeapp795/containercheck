@@ -2,15 +2,19 @@
 
 @section('content')
     <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-bold text-gray-800">Gestión de Usuarios (Administrador)</h2>
-        <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-            <i class="fas fa-plus"></i> Nuevo Usuario
+        <div class="flex flex-col">
+            <h2 class="text-2xl font-bold text-gray-800">Gestión de Usuarios (Administrador)</h2>
+            <h4 class="text-lg text-gray-600">Administración central de cuentas y permisos</h4>
+        </div>
+
+        <button class="hover:bg-blue-700  font-bold py-2 px-4 rounded" style="background-color: #a6c64b;">
+            <i class="fa-solid fa-user-plus"></i> Nuevo Usuario
         </button>
     </div>
 
     <div class="bg-white shadow-md rounded my-6 overflow-x-auto">
         <table class="min-w-full bg-white grid-cols-1">
-            <thead class="bg-gray-800 text-white">
+            <thead class="text-white" style="background-color: #002c73">
                 <tr>
                     <th class="w-1/4 text-left py-3 px-4 uppercase font-semibold text-sm">Nombre</th>
                     <th class="w-1/4 text-left py-3 px-4 uppercase font-semibold text-sm">Email / Doc</th>

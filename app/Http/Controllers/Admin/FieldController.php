@@ -31,7 +31,9 @@ class FieldController extends Controller
      */
     public function create(Fase $phase)
     {
-        return view('admin.fields.create', compact('phase'));
+        // Get all fields from this phase to use as parents
+        $fields = $phase->fields()->orderBy('order')->get();
+        return view('admin.fields.create', compact('phase', 'fields'));
     }
 
     /**
@@ -43,10 +45,14 @@ class FieldController extends Controller
             'label' => 'required|string|max:255',
             'type' => 'required|in:text,number,select,date,signature,photo',
             'required' => 'boolean',
-            'options' => 'nullable|string', // JSON string or comma separated? Let's assume JSON string for now, or handle comma separated in logic
+            'options' => 'nullable|string',
             'description' => 'nullable|string',
-            'order' => 'integer',
+            'conditionals' => 'nullable|array', // { linked_to: id, value: val }
         ]);
+
+        // Auto-assign order
+        $maxOrder = $phase->fields()->max('order');
+        $validated['order'] = $maxOrder ? $maxOrder + 1 : 1;
 
         // Checkbox handling
         $validated['required'] = $request->has('required');
@@ -66,10 +72,34 @@ class FieldController extends Controller
             $validated['options'] = json_encode($options);
         }
 
+        // Handle Conditionals
+        if ($request->filled('conditionals.linked_to') && $request->filled('conditionals.value')) {
+            $validated['conditionals'] = [
+                'linked_to' => $request->input('conditionals.linked_to'),
+                'value' => $request->input('conditionals.value')
+            ];
+        } else {
+            $validated['conditionals'] = null;
+        }
+
         Field::create($validated);
         $this->schemaManager->addFieldColumn($phase->table_name, $validated['column_name'], $validated['type']);
 
         return redirect()->route('admin.phases.fields.index', $phase->id)->with('success', 'Campo creado exitosamente.');
+    }
+
+    public function reorder(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:fields,id',
+        ]);
+
+        foreach ($request->ids as $index => $id) {
+            Field::where('id', $id)->update(['order' => $index + 1]);
+        }
+
+        return response()->json(['status' => 'success']);
     }
 
     /**
@@ -85,7 +115,9 @@ class FieldController extends Controller
      */
     public function edit(Field $field)
     {
-        return view('admin.fields.edit', compact('field'));
+        // Get sibling fields except itself
+        $fields = $field->phase->fields()->where('id', '!=', $field->id)->orderBy('order')->get();
+        return view('admin.fields.edit', compact('field', 'fields'));
     }
 
     /**
@@ -100,6 +132,7 @@ class FieldController extends Controller
             'options' => 'nullable|string',
             'description' => 'nullable|string',
             'order' => 'integer',
+            'conditionals' => 'nullable|array', // { linked_to: id, value: val }
         ]);
 
         $validated['required'] = $request->has('required');
@@ -113,6 +146,16 @@ class FieldController extends Controller
             } else {
                 $validated['options'] = $inputOptions;
             }
+        }
+
+        // Handle Conditionals
+        if ($request->filled('conditionals.linked_to') && $request->filled('conditionals.value')) {
+            $validated['conditionals'] = [
+                'linked_to' => $request->input('conditionals.linked_to'),
+                'value' => $request->input('conditionals.value')
+            ];
+        } else {
+            $validated['conditionals'] = null;
         }
 
         $field->update($validated);

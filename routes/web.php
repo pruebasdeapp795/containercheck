@@ -14,7 +14,9 @@ Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::resource('users', UserController::class);
+    Route::post('phases/reorder', [PhaseController::class, 'reorder'])->name('phases.reorder');
     Route::resource('phases', PhaseController::class);
+    Route::post('fields/reorder', [FieldController::class, 'reorder'])->name('fields.reorder');
     Route::resource('phases.fields', FieldController::class)->shallow();
 });
 

@@ -31,17 +31,8 @@
                     id="description" name="description">{{ $phase->description }}</textarea>
             </div>
 
-            <div class="mb-4 grid grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="order">
-                        Orden
-                    </label>
-                    <input
-                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                        id="order" name="order" type="number" value="{{ $phase->order }}">
-                </div>
-
-                <div class="flex items-center mt-6">
+            <div class="mb-4">
+                <div class="flex items-center">
                     <input type="checkbox" id="is_active" name="is_active" value="1"
                         class="form-checkbox h-5 w-5 text-blue-600" {{ $phase->is_active ? 'checked' : '' }}>
                     <label for="is_active" class="ml-2 text-gray-700">Fase Activa</label>

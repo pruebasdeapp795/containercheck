@@ -11,11 +11,11 @@
 
 <body class="bg-gray-100 font-sans leading-normal tracking-normal">
 
-    <nav class="bg-gray-800 text-white p-4 shadow-lg">
+    <nav class=" text-white p-4 shadow-lg" style="background-color: #002c73;">
         <div class="container mx-auto flex justify-between items-center">
-            <a href="/" class="text-xl font-bold">ContainerCheck</a>
+            <a href="/" class="text-xl font-bold ms-4"> <i class="fa-solid fa-truck"></i> ContainerCheck</a>
 
-            <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-4 me-3">
                 @auth
                     @if(auth()->user()->role === 'admin')
                         <a href="{{ route('admin.users.index') }}" class="hover:text-gray-300">Usuarios</a>
@@ -27,7 +27,7 @@
                     <form action="{{ route('logout') }}" method="POST" class="inline">
                         @csrf
                         <button type="submit"
-                            class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded text-sm">
+                            class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 me-4 rounded text-sm">
                             Salir
                         </button>
                     </form>

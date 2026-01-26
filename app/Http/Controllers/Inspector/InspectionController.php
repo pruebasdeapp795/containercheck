@@ -78,7 +78,12 @@ class InspectionController extends Controller
         // Temporarily attach to inspection for the view to work without major changes
         $inspection->setRelation('values', $values);
 
-        return view('inspector.inspections.edit', compact('inspection', 'phases'));
+        $canEdit = in_array($inspection->status, ['draft', 'in_progress']);
+
+        // Check for specific permission if needed (e.g. if user is admin overriding)
+        // For now, simple status check + ownership (already in findOrFail)
+
+        return view('inspector.inspections.edit', compact('inspection', 'phases', 'canEdit'));
     }
 
     public function update(Request $request, string $id)
@@ -173,6 +178,10 @@ class InspectionController extends Controller
         // Check SignatureController logic essentially here if needed, 
         // but let's keep it simple: form saves values. Signature button is separate or part of form?
         // Let's assume signature is handled via separate AJAX or a final step. 
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => 'Guardado correctamente.']);
+        }
 
         return redirect()->route('inspector.inspections.edit', $inspection->id)
             ->with('success', 'Inspección guardada.');

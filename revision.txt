@@ -1,0 +1,11 @@
+Fecha : calculabre | No
+Inicio Inspeccion : tiempo calculable | por pensar 
+tipo de inspeccion | por ver como lo modifico en caso de cambio de formulario
+Consecutivo : se genera automaticamente se ve en el dashboard 
+hora de terminacion de inspeccion: calculable 
+
+tipo de contedor : 20 | 40 | otro
+N°contenedor/ placa vehiculo
+Estado animico del conductor | opcion tipo checkbox
+
+

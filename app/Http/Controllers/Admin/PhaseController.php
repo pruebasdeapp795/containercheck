@@ -30,10 +30,13 @@ class PhaseController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'order' => 'integer',
             'description' => 'nullable|string',
             'is_active' => 'boolean',
         ]);
+
+        // Auto-assign order
+        $maxOrder = Fase::max('order');
+        $validated['order'] = $maxOrder ? $maxOrder + 1 : 1;
 
         // Auto-generate table name from name
         $validated['table_name'] = 'phase_' . \Illuminate\Support\Str::slug($validated['name'], '_');
@@ -43,6 +46,20 @@ class PhaseController extends Controller
         $this->schemaManager->createPhaseTable($phase->table_name);
 
         return redirect()->route('admin.phases.index')->with('success', 'Fase creada exitosamente.');
+    }
+
+    public function reorder(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:phases,id',
+        ]);
+
+        foreach ($request->ids as $index => $id) {
+            Fase::where('id', $id)->update(['order' => $index + 1]);
+        }
+
+        return response()->json(['status' => 'success']);
     }
 
     public function edit(string $id)

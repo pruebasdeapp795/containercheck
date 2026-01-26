@@ -68,19 +68,42 @@
                     placeholder="Opción 1, Opción 2, Opción 3">
             </div>
 
-            <div class="mb-4 grid grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="order">
-                        Orden
-                    </label>
-                    <input
-                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                        id="order" name="order" type="number" value="{{ $field->order }}">
-                </div>
-
-                <div class="flex items-center mt-6">
-                    <input type="checkbox" id="required" name="required" class="form-checkbox h-5 w-5 text-blue-600" {{ $field->required ? 'checked' : '' }}>
+            <div class="mb-4">
+                <div class="flex items-center">
+                    <input type="checkbox" id="required" name="required" value="1"
+                        class="form-checkbox h-5 w-5 text-blue-600" {{ $field->required ? 'checked' : '' }}>
                     <label for="required" class="ml-2 text-gray-700">Requerido</label>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <h3 class="text-lg font-semibold text-gray-700 mb-2 border-b pb-1">Lógica Condicional (Opcional)</h3>
+                <p class="text-sm text-gray-500 mb-2">Este campo solo se mostrará si se cumple la condición.</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="conditional_linked_to" class="block text-gray-700 font-bold mb-2">Campo Padre
+                            (Condición)</label>
+                        <select name="conditionals[linked_to]" id="conditional_linked_to"
+                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                            <option value="">-- Ninguno (Siempre visible) --</option>
+                            @foreach($fields as $parentField)
+                                <option value="{{ $parentField->id }}" {{ (isset($field->conditionals['linked_to']) && $field->conditionals['linked_to'] == $parentField->id) ? 'selected' : '' }}>
+                                    {{ $parentField->label }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label for="conditional_value" class="block text-gray-700 font-bold mb-2">Mostrar si valor es igual
+                            a:</label>
+                        <input type="text" name="conditionals[value]" id="conditional_value"
+                            value="{{ $field->conditionals['value'] ?? '' }}"
+                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            placeholder="Ej: SI">
+                        <p class="text-xs text-gray-500 mt-1">Para checkbox usar '1' o 'on'. Para select, el valor exacto.
+                        </p>
+                    </div>
                 </div>
             </div>
 
