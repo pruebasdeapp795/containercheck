@@ -40,6 +40,18 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        'admin' => [
+            'driver' => 'session',
+            'provider' => 'admins',
+        ],
+        'control_riesgo' => [
+            'driver' => 'session',
+            'provider' => 'control_riesgos',
+        ],
+        'personal' => [
+            'driver' => 'session',
+            'provider' => 'personals',
+        ],
     ],
 
     /*
