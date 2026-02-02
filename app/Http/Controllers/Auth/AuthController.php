@@ -23,7 +23,7 @@ class AuthController extends Controller
 
         if (Auth::attempt(['cedula' => $credentials['cedula'], 'password' => $credentials['password'], 'role' => 'personal'])) {
             $request->session()->regenerate();
-            return redirect()->intended('/dashboard');
+            return redirect()->intended(route('personal.index'));
         }
 
         return back()->withErrors(['cedula' => 'Cédula o contraseña incorrectas.']);
@@ -44,7 +44,7 @@ class AuthController extends Controller
         // Intentar autenticar por usuario en lugar de email
         if (Auth::attempt(['usuario' => $credentials['usuario'], 'password' => $credentials['password'], 'role' => 'control_riesgo'])) {
             $request->session()->regenerate();
-            return redirect()->intended('/dashboard');
+            return redirect()->intended(route('control-riesgo.index'));
         }
 
         return back()->withErrors(['usuario' => 'Credenciales incorrectas para Control Riego.']);
@@ -64,7 +64,7 @@ class AuthController extends Controller
 
         if (Auth::attempt(['usuario' => $credentials['usuario'], 'password' => $credentials['password'], 'role' => 'admin'])) {
             $request->session()->regenerate();
-            return redirect()->intended('/dashboard');
+            return redirect()->intended(route('admin.index'));
         }
 
         return back()->withErrors(['usuario' => 'Credenciales incorrectas para Administrador.']);
@@ -75,6 +75,6 @@ class AuthController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect('/portal');
+        return redirect()->route('portal');
     }
 }
