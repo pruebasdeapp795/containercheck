@@ -172,8 +172,9 @@
                             @php
                                 $fieldVal = $response->fieldResponses->where('field_id', $field->id)->first()?->value;
                                 $isLocked = $index <= $response->last_phase_completed;
+                                $isCabecera = str_contains(strtoupper($phase->name), 'CABECERA');
                             @endphp
-                            <div class="col-12">
+                            <div class="{{ $isCabecera ? 'col-md-6' : 'col-12' }}">
                                 <label
                                     class="form-label fw-semibold small text-uppercase text-muted">{{ $field->label }}</label>
 
@@ -186,8 +187,18 @@
                                         class="form-control {{ $isLocked ? 'disabled-field' : '' }}" value="{{ $fieldVal }}"
                                         required>
                                 @elseif($field->type == 'date')
+                                    @php 
+                                        $finalDate = $fieldVal ?? (str_contains(strtoupper($field->label), 'FECHA') ? date('Y-m-d') : '');
+                                    @endphp
                                     <input type="date" name="fields[{{ $field->id }}]"
-                                        class="form-control {{ $isLocked ? 'disabled-field' : '' }}" value="{{ $fieldVal }}"
+                                        class="form-control {{ $isLocked ? 'disabled-field' : '' }}" value="{{ $finalDate }}"
+                                        required>
+                                @elseif($field->type == 'time')
+                                    @php 
+                                        $finalTime = $fieldVal ?? (str_contains(strtoupper($field->label), 'INICIO') ? date('H:i') : '');
+                                    @endphp
+                                    <input type="time" name="fields[{{ $field->id }}]"
+                                        class="form-control {{ $isLocked ? 'disabled-field' : '' }}" value="{{ $finalTime }}"
                                         required>
                                 @elseif($field->type == 'select')
                                     <select name="fields[{{ $field->id }}]"
@@ -266,7 +277,7 @@
                 </div>
 
                 <div class="mt-4 d-flex justify-content-between">
-                    <button type="button" class="btn btn-outline-secondary" onclick="prevStep('final')">Atrás</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="prevStep('final')">Atras</button>
                     <button type="submit" class="btn btn-success px-4 fw-bold">ENVIAR INSPECCIÓN</button>
                 </div>
             </form>
@@ -485,6 +496,7 @@
                 if (form) checkRejection(form);
             }
         }
+
 
         // Initialize for current active phase on load
         document.addEventListener('DOMContentLoaded', () => {

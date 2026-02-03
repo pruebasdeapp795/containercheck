@@ -62,6 +62,8 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         Route::put('/phase/{phase}', [App\Http\Controllers\Admin\FormConfigController::class, 'updatePhase'])->name('phase.update');
         Route::post('/phase/{phase}/field', [App\Http\Controllers\Admin\FormConfigController::class, 'storeField'])->name('field.store');
         Route::put('/field/{field}', [App\Http\Controllers\Admin\FormConfigController::class, 'updateField'])->name('field.update');
+        Route::post('/reorder-phases', [App\Http\Controllers\Admin\FormConfigController::class, 'reorderPhases'])->name('phases.reorder');
+        Route::post('/reorder-fields', [App\Http\Controllers\Admin\FormConfigController::class, 'reorderFields'])->name('fields.reorder');
     });
 
     Route::prefix('admin/reports')->name('admin.reports.')->group(function () {

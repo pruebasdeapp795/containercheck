@@ -107,4 +107,26 @@ class FormConfigController extends Controller
 
         return back()->with('success', 'Campo actualizado.');
     }
+
+    public function reorderPhases(Request $request)
+    {
+        $request->validate(['order' => 'required|array']);
+
+        foreach ($request->order as $index => $id) {
+            Phase::where('id', $id)->update(['order' => $index]);
+        }
+
+        return response()->json(['success' => true]);
+    }
+
+    public function reorderFields(Request $request)
+    {
+        $request->validate(['order' => 'required|array']);
+
+        foreach ($request->order as $index => $id) {
+            Field::where('id', $id)->update(['order' => $index]);
+        }
+
+        return response()->json(['success' => true]);
+    }
 }
