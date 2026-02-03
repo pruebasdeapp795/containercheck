@@ -31,10 +31,15 @@ Route::prefix('login')->group(function () {
     Route::post('/admin', [AuthController::class, 'adminLogin']);
 });
 
-Route::middleware(['auth', 'role:control_riesgo'])->group(function () {
-    Route::get('/control-riesgo/index', function () {
-        return view('control-riesgo.index');
-    })->name('control-riesgo.index');
+Route::middleware(['auth', 'role:control_riesgo'])->prefix('control-riesgo')->name('control-riesgo.')->group(function () {
+    Route::get('/dashboard', [App\Http\Controllers\ControlRiesgo\FormResponseController::class, 'dashboard'])->name('index');
+    Route::get('/inspecciones/nueva/{version}', [App\Http\Controllers\ControlRiesgo\FormResponseController::class, 'create'])->name('inspecciones.create');
+    Route::get('/inspecciones/{response}/continuar', [App\Http\Controllers\ControlRiesgo\FormResponseController::class, 'edit'])->name('inspecciones.edit');
+    Route::post('/inspecciones/{response}/fase', [App\Http\Controllers\ControlRiesgo\FormResponseController::class, 'savePhase'])->name('inspecciones.savePhase');
+    Route::post('/inspecciones/{response}/finalizar', [App\Http\Controllers\ControlRiesgo\FormResponseController::class, 'store'])->name('store');
+
+    Route::get('/reportes', [App\Http\Controllers\ControlRiesgo\FormResponseController::class, 'history'])->name('reportes');
+    Route::get('/reportes/{response}', [App\Http\Controllers\ControlRiesgo\FormResponseController::class, 'show'])->name('reportes.show');
 });
 
 Route::middleware(['auth', 'role:personal'])->group(function () {
@@ -47,6 +52,22 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/index', function () {
         return view('admin.index');
     })->name('admin.index');
+
+    Route::prefix('admin/forms')->name('admin.forms.')->group(function () {
+        Route::get('/', [App\Http\Controllers\Admin\FormConfigController::class, 'index'])->name('index');
+        Route::post('/version', [App\Http\Controllers\Admin\FormConfigController::class, 'storeVersion'])->name('version.store');
+        Route::get('/{version}', [App\Http\Controllers\Admin\FormConfigController::class, 'show'])->name('show');
+        Route::post('/{version}/activate', [App\Http\Controllers\Admin\FormConfigController::class, 'activate'])->name('activate');
+        Route::post('/{version}/phase', [App\Http\Controllers\Admin\FormConfigController::class, 'storePhase'])->name('phase.store');
+        Route::put('/phase/{phase}', [App\Http\Controllers\Admin\FormConfigController::class, 'updatePhase'])->name('phase.update');
+        Route::post('/phase/{phase}/field', [App\Http\Controllers\Admin\FormConfigController::class, 'storeField'])->name('field.store');
+        Route::put('/field/{field}', [App\Http\Controllers\Admin\FormConfigController::class, 'updateField'])->name('field.update');
+    });
+
+    Route::prefix('admin/reports')->name('admin.reports.')->group(function () {
+        Route::get('/', [App\Http\Controllers\Admin\ReportController::class, 'index'])->name('index');
+        Route::get('/{response}', [App\Http\Controllers\Admin\ReportController::class, 'show'])->name('show');
+    });
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
