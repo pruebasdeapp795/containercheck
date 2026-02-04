@@ -262,27 +262,69 @@
         <!-- Final Phase: Signature -->
         <div id="phase-final" class="phase-card">
             <h5 class="fw-bold text-primary mb-4">Finalizar Inspección</h5>
-            <div class="alert alert-info small">
-                Al firmar esta inspección, todos los datos anteriores quedarán registrados permanentemente.
-            </div>
 
-            <form action="{{ route('control-riesgo.store', $response->id) }}" method="POST" id="finalForm">
-                @csrf
-                <input type="hidden" name="signature" id="signatureInput">
+            @php
+                $pendingSignatures = $response->inspectionSignatures->whereNull('signed_at');
+            @endphp
 
-                <div class="text-center">
-                    <div class="signature-container bg-light rounded border mb-3" style="touch-action: none;">
-                        <canvas id="signature-pad" style="width: 100%; height: 250px; background: white;"></canvas>
+            @if($pendingSignatures->count() > 0)
+                <div class="alert alert-warning border-warning shadow-sm">
+                    <h5 class="alert-heading fw-bold text-warning-emphasis">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>Esperando Firmas del Personal
+                    </h5>
+                    <p class="mb-2">La inspección no puede finalizarse hasta que el siguiente personal haya ingresado al sistema y firmado:</p>
+                    <ul class="list-group list-group-flush mb-3 rounded bg-white">
+                        @foreach($pendingSignatures as $sig)
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="fw-bold">{{ $sig->user->name }}</span>
+                                    <br>
+                                    <small class="text-muted">{{ $sig->role_in_inspection }} (CC: {{ $sig->user->cedula }})</small>
+                                </div>
+                                <span class="badge bg-warning text-dark">Pendiente</span>
+                            </li>
+                        @endforeach
+                    </ul>
+                    <div class="d-flex gap-2">
+                        <a href="{{ request()->url() }}" class="btn btn-warning w-100 fw-bold">
+                            <i class="bi bi-arrow-clockwise"></i> Actualizar Estado de Firmas
+                        </a>
                     </div>
-                    <button type="button" class="btn btn-sm btn-link text-danger" id="clearBtn"><i
-                            class="bi bi-eraser"></i> Limpiar Firma</button>
                 </div>
-
+                
                 <div class="mt-4 d-flex justify-content-between">
                     <button type="button" class="btn btn-outline-secondary" onclick="prevStep('final')">Atras</button>
-                    <button type="submit" class="btn btn-success px-4 fw-bold">ENVIAR INSPECCIÓN</button>
+                    <button class="btn btn-secondary disabled" disabled>Esperando Firmas...</button>
                 </div>
-            </form>
+
+                <!-- Hidden elements to prevent JS errors if needed, though better to handle in JS -->
+                <div class="d-none">
+                    <canvas id="signature-pad"></canvas>
+                    <form id="finalForm"></form>
+                </div>
+            @else
+                <div class="alert alert-info small">
+                    Al firmar esta inspección, todos los datos anteriores quedarán registrados permanentemente.
+                </div>
+
+                <form action="{{ route('control-riesgo.store', $response->id) }}" method="POST" id="finalForm">
+                    @csrf
+                    <input type="hidden" name="signature" id="signatureInput">
+
+                    <div class="text-center">
+                        <div class="signature-container bg-light rounded border mb-3" style="touch-action: none;">
+                            <canvas id="signature-pad" style="width: 100%; height: 250px; background: white;"></canvas>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-link text-danger" id="clearBtn"><i
+                                class="bi bi-eraser"></i> Limpiar Firma</button>
+                    </div>
+
+                    <div class="mt-4 d-flex justify-content-between">
+                        <button type="button" class="btn btn-outline-secondary" onclick="prevStep('final')">Atras</button>
+                        <button type="submit" class="btn btn-success px-4 fw-bold">ENVIAR INSPECCIÓN</button>
+                    </div>
+                </form>
+            @endif
         </div>
     </div>
 
@@ -352,17 +394,20 @@
                 }
             });
 
+            const btnText = btn.querySelector('.btn-text');
+            const btnReject = btn.querySelector('.btn-reject');
+
             if (hasAnyRejection) {
                 btn.classList.add('btn-danger');
                 btn.classList.remove('btn-primary');
-                btn.querySelector('.btn-text').classList.add('d-none');
-                btn.querySelector('.btn-reject').classList.remove('d-none');
+                if (btnText) btnText.classList.add('d-none');
+                if (btnReject) btnReject.classList.remove('d-none');
                 form.dataset.hasRejection = "true";
             } else {
                 btn.classList.add('btn-primary');
                 btn.classList.remove('btn-danger');
-                btn.querySelector('.btn-text').classList.remove('d-none');
-                btn.querySelector('.btn-reject').classList.add('d-none');
+                if (btnText) btnText.classList.remove('d-none');
+                if (btnReject) btnReject.classList.add('d-none');
                 delete form.dataset.hasRejection;
             }
         }
@@ -381,7 +426,6 @@
                 if (!confirm("ADVERTENCIA: Se ha detectado un valor que NO CUMPLE con los requisitos mínimos. Esta inspección será RECHAZADA Y NOTIFICADA. ¿Desea finalizar el proceso ahora?")) {
                     return;
                 }
-                // If confirmed, we finish the form immediately by sending a special signal
                 const formData = new FormData(form);
                 formData.append('is_rejected', '1');
 
@@ -399,8 +443,12 @@
             const order = form.dataset.order;
 
             btn.disabled = true;
-            btn.querySelector('.btn-text').classList.add('d-none');
-            btn.querySelector('.spinner-border').classList.remove('d-none');
+            
+            const btnText = btn.querySelector('.btn-text');
+            const btnSpinner = btn.querySelector('.spinner-border');
+            
+            if (btnText) btnText.classList.add('d-none');
+            if (btnSpinner) btnSpinner.classList.remove('d-none');
 
             const formData = new FormData(form);
 
@@ -415,6 +463,23 @@
                 });
 
                 if (res.ok) {
+                    const data = await res.json();
+                    
+                    if (data.pending_signatures) {
+                        alert("ATENCIÓN: " + data.message + "\n\nEl formulario no podrá avanzar hasta que el personal ingrese y firme.\nComunique al personal para que firme y luego haga clic en 'Verificar Firmas'.");
+                        
+                        // Change button to "Verify" mode but KEEP structure for loading state AND rejection check
+                        btn.classList.remove('btn-primary');
+                        btn.classList.add('btn-warning');
+                        btn.innerHTML = '<span class="btn-text fw-bold"><i class="bi bi-arrow-clockwise"></i> Verificar Firmas</span>' + 
+                                        '<span class="btn-reject d-none text-white fw-bold">FINALIZAR POR RECHAZO</span>' +
+                                        '<span class="spinner-border spinner-border-sm d-none" role="status"></span>';
+                        
+                        // Allow clicking again
+                        btn.disabled = false;
+                        return; // Stop here, don't advance
+                    }
+
                     const currentOrder = parseInt(order);
                     if (currentOrder > lastPhaseCompleted) {
                         lastPhaseCompleted = currentOrder;
@@ -426,14 +491,21 @@
                     nextStep(currentOrder);
                 } else {
                     alert("Error al guardar. Verifique su conexión.");
+                    resetBtnState(btn);
                 }
             } catch (err) {
+                console.error(err);
                 alert("Error de red.");
-            } finally {
-                btn.disabled = false;
-                btn.querySelector('.btn-text').classList.remove('d-none');
-                btn.querySelector('.spinner-border').classList.add('d-none');
+                resetBtnState(btn);
             }
+        }
+
+        function resetBtnState(btn) {
+            btn.disabled = false;
+            const btnText = btn.querySelector('.btn-text');
+            const btnSpinner = btn.querySelector('.spinner-border');
+            if (btnText) btnText.classList.remove('d-none');
+            if (btnSpinner) btnSpinner.classList.add('d-none');
         }
 
         function nextStep(currentIdx) {

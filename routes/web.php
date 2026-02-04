@@ -44,8 +44,30 @@ Route::middleware(['auth', 'role:control_riesgo'])->prefix('control-riesgo')->na
 
 Route::middleware(['auth', 'role:personal'])->group(function () {
     Route::get('/personal/index', function () {
-        return view('personal.index');
+        $user = Auth::user();
+        $pendingSignatures = \App\Models\InspectionSignature::where('user_id', $user->id)
+            ->whereNull('signed_at')
+            ->with(['formResponse.formVersion', 'formResponse.user'])
+            ->get();
+        return view('personal.index', compact('pendingSignatures'));
     })->name('personal.index');
+
+    Route::post('/personal/sign/{signature}', function (\Illuminate\Http\Request $request, \App\Models\InspectionSignature $signature) {
+        if ($signature->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $request->validate([
+            'signature_data' => 'required|string'
+        ]);
+
+        $signature->update([
+            'signature' => $request->signature_data,
+            'signed_at' => now()
+        ]);
+
+        return back()->with('success', 'Firma guardada correctamente.');
+    })->name('personal.sign');
 });
 
 Route::middleware(['auth', 'role:admin'])->group(function () {

@@ -22,4 +22,9 @@ class FormResponse extends Model
     {
         return $this->hasMany(FieldResponse::class);
     }
+
+    public function inspectionSignatures()
+    {
+        return $this->hasMany(InspectionSignature::class);
+    }
 }
