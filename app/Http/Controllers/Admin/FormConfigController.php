@@ -72,7 +72,7 @@ class FormConfigController extends Controller
     {
         $request->validate([
             'label' => 'required|string',
-            'type' => 'required|in:text,numeric,date,photo,select',
+            'type' => 'required|in:text,numeric,date,time,photo,select',
             'options' => 'nullable|string',
             'rejection_value' => 'nullable|string'
         ]);
@@ -92,7 +92,7 @@ class FormConfigController extends Controller
     {
         $request->validate([
             'label' => 'required|string',
-            'type' => 'required|in:text,numeric,date,photo,select',
+            'type' => 'required|in:text,numeric,date,time,photo,select',
             'options' => 'nullable|string',
             'rejection_value' => 'nullable|string'
         ]);

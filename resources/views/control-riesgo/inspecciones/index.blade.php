@@ -188,18 +188,20 @@
                                         required>
                                 @elseif($field->type == 'date')
                                     @php 
-                                        $finalDate = $fieldVal ?? (str_contains(strtoupper($field->label), 'FECHA') ? date('Y-m-d') : '');
+                                        $finalDate = $fieldVal ?? date('Y-m-d');
                                     @endphp
-                                    <input type="date" name="fields[{{ $field->id }}]"
-                                        class="form-control {{ $isLocked ? 'disabled-field' : '' }}" value="{{ $finalDate }}"
-                                        required>
+                                    <input type="date" 
+                                        class="form-control disabled-field" value="{{ $finalDate }}"
+                                        readonly>
+                                    <input type="hidden" name="fields[{{ $field->id }}]" value="{{ $finalDate }}">
                                 @elseif($field->type == 'time')
                                     @php 
-                                        $finalTime = $fieldVal ?? (str_contains(strtoupper($field->label), 'INICIO') ? date('H:i') : '');
+                                        $finalTime = $fieldVal ?? date('H:i');
                                     @endphp
-                                    <input type="time" name="fields[{{ $field->id }}]"
-                                        class="form-control {{ $isLocked ? 'disabled-field' : '' }}" value="{{ $finalTime }}"
-                                        required>
+                                    <input type="time" 
+                                        class="form-control disabled-field" value="{{ $finalTime }}"
+                                        readonly>
+                                    <input type="hidden" name="fields[{{ $field->id }}]" value="{{ $finalTime }}">
                                 @elseif($field->type == 'select')
                                     <select name="fields[{{ $field->id }}]"
                                         class="form-select {{ $isLocked ? 'disabled-field' : '' }}"
