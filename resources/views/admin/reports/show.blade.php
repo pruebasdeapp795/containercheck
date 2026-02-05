@@ -1,24 +1,10 @@
-<!DOCTYPE html>
-<html lang="es">
+@extends('layouts.admin')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detalle de Formulario #{{ $response->id }}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f8f9fa;
-        }
+@section('title', 'Reporte de Formulario - Admin')
 
-        .navbar {
-            background-color: #ffffff !important;
-            border-bottom: 1px solid #eee;
-            padding: 0.8rem 2rem;
-        }
-
+@push('styles')
+  
+  <style>
         .card {
             border: none;
             border-radius: 12px;
@@ -40,20 +26,9 @@
             background: #fff;
         }
     </style>
-</head>
+@endpush
 
-<body>
-    <nav class="navbar navbar-expand-lg">
-        <div class="container-fluid">
-            <a class="navbar-brand fw-bold" href="{{ route('admin.index') }}">ContainerCheck</a>
-            <div class="collapse navbar-collapse">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="{{ route('admin.reports.index') }}">Volver a
-                            Reportes</a></li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+@section('content')
 
     <div class="container mt-5 mb-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
@@ -107,6 +82,4 @@
             @endif
         </div>
     </div>
-</body>
-
-</html>
+@endsection
