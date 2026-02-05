@@ -118,7 +118,9 @@
 <body>
     <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
-            <span class="navbar-brand fw-bold text-primary">ContainerCheck</span>
+           <a class="navbar-brand" href="{{ route('admin.index') }}">
+                <img src="{{ asset('imagenes/containerchecklogov.png') }}" width="140px" alt="ContainerCheck">
+            </a>
             <div class="d-flex align-items-center">
                 <span class="badge bg-info text-dark me-2">Borrador</span>
                 <a href="{{ asset('formats/formato_inspeccion.xlsx') }}" download
