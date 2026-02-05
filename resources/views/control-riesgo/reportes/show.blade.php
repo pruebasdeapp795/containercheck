@@ -169,7 +169,8 @@
                 <td class="label">No Contenedor:</td>
                 <td class="input-box">{{ $getValue('Numero de contenedor') }}</td>
                 <td class="label">Fin Inspección:</td>
-                <td class="input-box"> {{ $getValue('Hora de Terminación Inspección') }}</td>
+                <td class="input-box">
+                    {{ $response->signed_at ? \Carbon\Carbon::parse($response->signed_at)->format('H:i') : '' }}</td>
             </tr>
             <tr>
                 <td class="label">Tipo de operación</td>

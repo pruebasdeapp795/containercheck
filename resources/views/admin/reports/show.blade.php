@@ -101,7 +101,7 @@
             <h4 class="mb-3">Firma</h4>
             @if($response->signature)
                 <img src="{{ $response->signature }}" class="signature-img">
-                <p class="mt-2 text-muted small">Firmado el: {{ $response->signed_at->format('d/m/Y H:i') }}</p>
+                <p class="mt-2 text-muted small">Firmado el:  {{ $response->signed_at ? \Carbon\Carbon::parse($response->signed_at)->format('H:i') : '' }}</p>
             @else
                 <p class="text-danger">No se encontró firma.</p>
             @endif
