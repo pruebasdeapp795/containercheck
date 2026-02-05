@@ -167,74 +167,143 @@
                 <form class="phase-form" data-order="{{ $index }}" onsubmit="saveCurrentPhase(event, this)">
                     @csrf
                     <input type="hidden" name="phase_order" value="{{ $index }}">
-                    <div class="row g-3">
-                        @foreach($phase->fields as $field)
+                    
+                    @if(str_contains(strtoupper($phase->name), 'PERSONAL DEL CARGUE'))
+                        {{-- Custom Repeater UI for Personal del Cargue --}}
+                        <div id="personal-repeater-container">
                             @php
-                                $fieldVal = $response->fieldResponses->where('field_id', $field->id)->first()?->value;
-                                $isLocked = $index <= $response->last_phase_completed;
-                                $isCabecera = str_contains(strtoupper($phase->name), 'CABECERA');
-                            @endphp
-                            <div class="{{ $isCabecera ? 'col-md-6' : 'col-12' }}">
-                                <label
-                                    class="form-label fw-semibold small text-uppercase text-muted">{{ $field->label }}</label>
+                                // IDs: 57 (Nombre), 58 (Cargo), 59 (Chaleco), 65 (Cédula)
+                                $cedulasVal = $response->fieldResponses->where('field_id', 65)->first()?->value;
+                                $nombresVal = $response->fieldResponses->where('field_id', 57)->first()?->value;
+                                $cargosVal = $response->fieldResponses->where('field_id', 58)->first()?->value;
+                                $chalecosVal = $response->fieldResponses->where('field_id', 59)->first()?->value;
 
-                                @if($field->type == 'text')
-                                    <input type="text" name="fields[{{ $field->id }}]"
-                                        class="form-control {{ $isLocked ? 'disabled-field' : '' }}" value="{{ $fieldVal }}"
-                                        required>
-                                @elseif($field->type == 'numeric')
-                                    <input type="number" step="any" name="fields[{{ $field->id }}]"
-                                        class="form-control {{ $isLocked ? 'disabled-field' : '' }}" value="{{ $fieldVal }}"
-                                        required>
-                                @elseif($field->type == 'date')
-                                    @php 
-                                        $finalDate = $fieldVal ?? date('Y-m-d');
-                                    @endphp
-                                    <input type="date" 
-                                        class="form-control disabled-field" value="{{ $finalDate }}"
-                                        readonly>
-                                    <input type="hidden" name="fields[{{ $field->id }}]" value="{{ $finalDate }}">
-                                @elseif($field->type == 'time')
-                                    @php 
-                                        $finalTime = $fieldVal ?? date('H:i');
-                                    @endphp
-                                    <input type="time" 
-                                        class="form-control disabled-field" value="{{ $finalTime }}"
-                                        readonly>
-                                    <input type="hidden" name="fields[{{ $field->id }}]" value="{{ $finalTime }}">
-                                @elseif($field->type == 'select')
-                                    <select name="fields[{{ $field->id }}]"
-                                        class="form-select {{ $isLocked ? 'disabled-field' : '' }}"
-                                        data-rejection="{{ $field->rejection_value }}" required>
-                                        <option value="" disabled {{ !$fieldVal ? 'selected' : '' }}>Seleccione...</option>
-                                        @foreach(explode(',', $field->options) as $option)
-                                            <option value="{{ trim($option) }}" {{ $fieldVal == trim($option) ? 'selected' : '' }}>
-                                                {{ trim($option) }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                @elseif($field->type == 'photo')
-                                    <div class="photo-input-group">
-                                        @if(!$isLocked)
-                                            <div class="d-flex gap-2 mb-2">
-                                                <input type="file" name="fields[{{ $field->id }}]" id="input_{{ $field->id }}"
-                                                    class="d-none" accept="image/*" onchange="previewImage(this, '{{ $field->id }}')">
-                                                <button type="button" class="btn btn-sm btn-outline-primary"
-                                                    onclick="openCamera('{{ $field->id }}')"><i class="bi bi-camera"></i></button>
-                                                <button type="button" class="btn btn-sm btn-outline-primary"
-                                                    onclick="openGallery('{{ $field->id }}')"><i class="bi bi-images"></i></button>
+                                // Decode if JSON (array), otherwise make single array
+                                $cedulas = json_decode($cedulasVal, true) ?? ($cedulasVal ? [$cedulasVal] : ['']);
+                                $nombres = json_decode($nombresVal, true) ?? ($nombresVal ? [$nombresVal] : ['']);
+                                $cargos = json_decode($cargosVal, true) ?? ($cargosVal ? [$cargosVal] : ['']);
+                                $chalecos = json_decode($chalecosVal, true) ?? ($chalecosVal ? [$chalecosVal] : ['']);
+                                
+                                $isLocked = $index <= $response->last_phase_completed;
+                            @endphp
+
+                            @foreach($cedulas as $i => $ced)
+                                <div class="card mb-3 personal-row shadow-sm border-light bg-light">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="fw-bold text-secondary">Persona #<span class="row-number">{{ $i + 1 }}</span></span>
+                                            @if(!$isLocked && count($cedulas) > 1)
+                                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="removePersonalRow(this)">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            @endif
+                                        </div>
+                                        <div class="row g-2">
+                                            <div class="col-md-6 col-12">
+                                                <label class="form-label small text-muted">Nombre Completo</label>
+                                                <input type="text" name="fields[57][]" class="form-control {{ $isLocked ? 'disabled-field' : '' }}" 
+                                                    value="{{ $nombres[$i] ?? '' }}" required placeholder="Ingrese nombre">
                                             </div>
-                                        @endif
-                                        <div id="preview_container_{{ $field->id }}" class="{{ !$fieldVal ? 'd-none' : '' }}">
-                                            <img id="preview_img_{{ $field->id }}"
-                                                src="{{ $fieldVal ? asset('storage/' . $fieldVal) : '' }}" class="img-thumbnail"
-                                                style="max-height: 120px;">
+                                            <div class="col-md-6 col-12">
+                                                <label class="form-label small text-muted">Cédula</label>
+                                                <input type="number" name="fields[65][]" class="form-control {{ $isLocked ? 'disabled-field' : '' }}" 
+                                                    value="{{ $ced }}" required placeholder="Ingrese cédula">
+                                            </div>
+                                            <div class="col-md-6 col-12">
+                                                <label class="form-label small text-muted">Cargo</label>
+                                                <input type="text" name="fields[58][]" class="form-control {{ $isLocked ? 'disabled-field' : '' }}" 
+                                                    value="{{ $cargos[$i] ?? '' }}" required placeholder="Ingrese cargo">
+                                            </div>
+                                            <div class="col-md-6 col-12">
+                                                <label class="form-label small text-muted">No. Chaleco</label>
+                                                <input type="text" name="fields[59][]" class="form-control {{ $isLocked ? 'disabled-field' : '' }}" 
+                                                    value="{{ $chalecos[$i] ?? '' }}" placeholder="Opcional">
+                                            </div>
                                         </div>
                                     </div>
-                                @endif
+                                </div>
+                            @endforeach
+                        </div>
+
+                        @if(!$isLocked)
+                            <div class="mb-3">
+                                <button type="button" class="btn btn-sm btn-success w-100" onclick="addPersonalRow()">
+                                    <i class="bi bi-plus-circle"></i> Agregar Otra Persona
+                                </button>
                             </div>
-                        @endforeach
-                    </div>
+                        @endif
+
+                    @else
+                        {{-- Default rendering for other phases --}}
+                        <div class="row g-3">
+                            @foreach($phase->fields as $field)
+                                @php
+                                    $fieldVal = $response->fieldResponses->where('field_id', $field->id)->first()?->value;
+                                    $isLocked = $index <= $response->last_phase_completed;
+                                    $isCabecera = str_contains(strtoupper($phase->name), 'CABECERA');
+                                @endphp
+                                <div class="{{ $isCabecera ? 'col-md-6' : 'col-12' }}">
+                                    <label
+                                        class="form-label fw-semibold small text-uppercase text-muted">{{ $field->label }}</label>
+    
+                                    @if($field->type == 'text')
+                                        <input type="text" name="fields[{{ $field->id }}]"
+                                            class="form-control {{ $isLocked ? 'disabled-field' : '' }}" value="{{ $fieldVal }}"
+                                            required>
+                                    @elseif($field->type == 'numeric')
+                                        <input type="number" step="any" name="fields[{{ $field->id }}]"
+                                            class="form-control {{ $isLocked ? 'disabled-field' : '' }}" value="{{ $fieldVal }}"
+                                            required>
+                                    @elseif($field->type == 'date')
+                                        @php 
+                                            $finalDate = $fieldVal ?? date('Y-m-d');
+                                        @endphp
+                                        <input type="date" 
+                                            class="form-control disabled-field" value="{{ $finalDate }}"
+                                            readonly>
+                                        <input type="hidden" name="fields[{{ $field->id }}]" value="{{ $finalDate }}">
+                                    @elseif($field->type == 'time')
+                                        @php 
+                                            $finalTime = $fieldVal ?? date('H:i');
+                                        @endphp
+                                        <input type="time" 
+                                            class="form-control disabled-field" value="{{ $finalTime }}"
+                                            readonly>
+                                        <input type="hidden" name="fields[{{ $field->id }}]" value="{{ $finalTime }}">
+                                    @elseif($field->type == 'select')
+                                        <select name="fields[{{ $field->id }}]"
+                                            class="form-select {{ $isLocked ? 'disabled-field' : '' }}"
+                                            data-rejection="{{ $field->rejection_value }}" required>
+                                            <option value="" disabled {{ !$fieldVal ? 'selected' : '' }}>Seleccione...</option>
+                                            @foreach(explode(',', $field->options) as $option)
+                                                <option value="{{ trim($option) }}" {{ $fieldVal == trim($option) ? 'selected' : '' }}>
+                                                    {{ trim($option) }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    @elseif($field->type == 'photo')
+                                        <div class="photo-input-group">
+                                            @if(!$isLocked)
+                                                <div class="d-flex gap-2 mb-2">
+                                                    <input type="file" name="fields[{{ $field->id }}]" id="input_{{ $field->id }}"
+                                                        class="d-none" accept="image/*" onchange="previewImage(this, '{{ $field->id }}')">
+                                                    <button type="button" class="btn btn-sm btn-outline-primary"
+                                                        onclick="openCamera('{{ $field->id }}')"><i class="bi bi-camera"></i></button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary"
+                                                        onclick="openGallery('{{ $field->id }}')"><i class="bi bi-images"></i></button>
+                                                </div>
+                                            @endif
+                                            <div id="preview_container_{{ $field->id }}" class="{{ !$fieldVal ? 'd-none' : '' }}">
+                                                <img id="preview_img_{{ $field->id }}"
+                                                    src="{{ $fieldVal ? asset('storage/' . $fieldVal) : '' }}" class="img-thumbnail"
+                                                    style="max-height: 120px;">
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
 
                     <div class="mt-4 d-flex justify-content-between">
                         @if($index > 0)
@@ -603,6 +672,59 @@
                 document.getElementById('signatureInput').value = signaturePad.toDataURL();
             }
         });
+
+        function addPersonalRow() {
+            const container = document.getElementById('personal-repeater-container');
+            const rowCount = container.querySelectorAll('.personal-row').length + 1;
+            
+            const newRow = document.createElement('div');
+            newRow.className = 'card mb-3 personal-row shadow-sm border-light bg-light';
+            newRow.innerHTML = `
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="fw-bold text-secondary">Persona #<span class="row-number">${rowCount}</span></span>
+                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="removePersonalRow(this)">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-md-6 col-12">
+                            <label class="form-label small text-muted">Nombre Completo</label>
+                            <input type="text" name="fields[57][]" class="form-control" required placeholder="Ingrese nombre">
+                        </div>
+                        <div class="col-md-6 col-12">
+                            <label class="form-label small text-muted">Cédula</label>
+                            <input type="number" name="fields[65][]" class="form-control" required placeholder="Ingrese cédula">
+                        </div>
+                        <div class="col-md-6 col-12">
+                            <label class="form-label small text-muted">Cargo</label>
+                            <input type="text" name="fields[58][]" class="form-control" required placeholder="Ingrese cargo">
+                        </div>
+                        <div class="col-md-6 col-12">
+                            <label class="form-label small text-muted">No. Chaleco</label>
+                            <input type="text" name="fields[59][]" class="form-control" placeholder="Opcional">
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(newRow);
+        }
+
+        function removePersonalRow(btn) {
+            const row = btn.closest('.personal-row');
+            const container = document.getElementById('personal-repeater-container');
+            
+            // Initial rows might not be removable if we want at least one, but the button is only shown if > 1
+            if (container.querySelectorAll('.personal-row').length > 1) {
+                row.remove();
+                // Re-number rows
+                container.querySelectorAll('.personal-row').forEach((r, index) => {
+                    r.querySelector('.row-number').textContent = index + 1;
+                });
+            } else {
+                alert("Debe haber al menos una persona registrada.");
+            }
+        }
     </script>
 </body>
 

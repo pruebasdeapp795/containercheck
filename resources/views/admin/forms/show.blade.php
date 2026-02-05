@@ -122,14 +122,17 @@
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif
 
-        <div class="mt-4">
+        <div class="mt-4" id="phases-container">
             @foreach($version->phases as $phase)
-                <div class="card mb-4 phase-card" id="phase-card-{{ $phase->id }}">
+                <div class="card mb-4 phase-card" data-id="{{ $phase->id }}" id="phase-card-{{ $phase->id }}">
                     <div class="card-header d-flex justify-content-between align-items-center bg-info">
-                        <h5 class="fw-bold mb-0">
-                            {{ $phase->name }}
-                            @if(!$phase->is_visible) <small class="text-muted ms-2">(Oculto)</small> @endif
-                        </h5>
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-grip-vertical drag-handle me-2" style="cursor: grab; font-size: 1.2rem;"></i>
+                            <h5 class="fw-bold mb-0">
+                                {{ $phase->name }}
+                                @if(!$phase->is_visible) <small class="text-muted ms-2">(Oculto)</small> @endif
+                            </h5>
+                        </div>
                         <div class="d-flex gap-2">
                             <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
                                 data-bs-target="#editPhase{{ $phase->id }}">
@@ -328,6 +331,43 @@
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
         <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                var el = document.getElementById('phases-container');
+                if (el) {
+                    Sortable.create(el, {
+                        handle: '.drag-handle',
+                        animation: 150,
+                        onEnd: function (evt) {
+                            var order = [];
+                            document.querySelectorAll('.phase-card').forEach(function(card) {
+                                order.push(card.getAttribute('data-id'));
+                            });
+                            
+                            fetch('{{ route('admin.forms.phases.reorder') }}', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                },
+                                body: JSON.stringify({ order: order })
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if(data.success) {
+                                    console.log('Orden actualizado');
+                                } else {
+                                    alert('Error al guardar el orden');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                alert('Error de conexión');
+                            });
+                        }
+                    });
+                }
+            });
+
             document.addEventListener('change', function (e) {
                 if (e.target.matches('select[name="type"]')) {
                     const modalBody = e.target.closest('.modal-body');

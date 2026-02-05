@@ -82,52 +82,75 @@ class FormResponseController extends Controller
                 $value = $path;
             }
 
+            // Handle arrays (multipersonal) by encoding to JSON
+            $dbValue = is_array($value) ? json_encode($value) : $value;
+
             FieldResponse::updateOrCreate(
                 ['form_response_id' => $response->id, 'field_id' => $fieldId],
-                ['value' => $value]
+                ['value' => $dbValue]
             );
         }
 
         // Special Logic: Personal Del Cargue (Phase ID 13 Check via Field 65 - Cédula)
         // IDs: 57 (Nombre), 58 (Cargo), 59 (Chaleco), 65 (Cédula)
-        if (isset($request->fields[65]) && !empty($request->fields[65])) {
-            $cedula = $request->fields[65];
-            $nombre = $request->fields[57] ?? 'Personal';
-            $cargo = $request->fields[58] ?? 'Carga';
+        if (isset($request->fields[65])) {
+            $cedulas = $request->fields[65];
+            // Normalize to array
+            if (!is_array($cedulas))
+                $cedulas = [$cedulas];
 
-            // Find or Create User
-            $personalUser = User::where('cedula', $cedula)->first();
-            if (!$personalUser) {
-                // Check if email exists to avoid error (though unlikely with this pattern)
-                $email = $cedula . '@containercheck.local';
-                if (!User::where('email', $email)->exists()) {
-                    $personalUser = User::create([
-                        'name' => $nombre,
-                        'email' => $email,
-                        'cedula' => $cedula,
-                        'password' => Hash::make('12345678'), // Default Password
-                        'role' => 'personal'
-                    ]);
-                } else {
-                    $personalUser = User::where('email', $email)->first();
+            $nombres = $request->fields[57] ?? [];
+            if (!is_array($nombres))
+                $nombres = [$nombres];
+
+            $cargos = $request->fields[58] ?? [];
+            if (!is_array($cargos))
+                $cargos = [$cargos];
+
+            $chalecos = $request->fields[59] ?? [];
+            if (!is_array($chalecos))
+                $chalecos = [$chalecos];
+
+            foreach ($cedulas as $index => $cedula) {
+                if (empty($cedula))
+                    continue;
+
+                $nombre = $nombres[$index] ?? 'Personal';
+                $cargo = $cargos[$index] ?? 'Carga';
+                $chaleco = $chalecos[$index] ?? '';
+
+                // Find or Create User
+                $personalUser = User::where('cedula', $cedula)->first();
+                if (!$personalUser) {
+                    // Check if email exists to avoid error (though unlikely with this pattern)
+                    $email = $cedula . '@containercheck.local';
+                    if (!User::where('email', $email)->exists()) {
+                        $personalUser = User::create([
+                            'name' => $nombre,
+                            'email' => $email,
+                            'cedula' => $cedula,
+                            'password' => Hash::make('12345678'), // Default Password
+                            'role' => 'personal'
+                        ]);
+                    } else {
+                        $personalUser = User::where('email', $email)->first();
+                    }
                 }
-            }
 
-            $chaleco = $request->fields[59] ?? '';
-
-            // Create Signature Requirement if not exists
-            if ($personalUser) {
-                InspectionSignature::firstOrCreate(
-                    [
-                        'form_response_id' => $response->id,
-                        'user_id' => $personalUser->id
-                    ],
-                    [
-                        'role_in_inspection' => $cargo,
-                        'vest_number' => $chaleco,
-                        'signed_at' => null // Pending signature
-                    ]
-                );
+                // Create Signature Requirement if not exists
+                if ($personalUser) {
+                    InspectionSignature::firstOrCreate(
+                        [
+                            'form_response_id' => $response->id,
+                            'user_id' => $personalUser->id
+                        ],
+                        [
+                            'role_in_inspection' => $cargo,
+                            'vest_number' => $chaleco,
+                            'signed_at' => null // Pending signature
+                        ]
+                    );
+                }
             }
         }
 

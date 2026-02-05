@@ -10,6 +10,8 @@
             font-family: Arial, sans-serif;
             margin: 20px;
             font-size: 12px;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
         }
 
         @media print {
@@ -168,6 +170,10 @@
                 <td class="input-box">{{ $getValue('Numero de contenedor') }}</td>
                 <td class="label">Fin Inspección:</td>
                 <td class="input-box"> {{ $getValue('Hora de Terminación Inspección') }}</td>
+            </tr>
+            <tr>
+                <td class="label">Tipo de operación</td>
+                <td class="input-box" colspan="3">{{ $getValue('Operación') }}</td>
             </tr>
         </tbody>
     </table>
