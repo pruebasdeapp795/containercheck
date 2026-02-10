@@ -207,6 +207,23 @@ class FormResponseController extends Controller
         return view('control-riesgo.reportes.index', compact('responses'));
     }
 
+    public function searchUserByCedula($cedula)
+    {
+        $user = User::where('cedula', $cedula)->first();
+
+        if ($user) {
+            return response()->json([
+                'found' => true,
+                'name' => $user->name,
+                'cedula' => $user->cedula
+            ]);
+        }
+
+        return response()->json([
+            'found' => false
+        ]);
+    }
+
     public function show(FormResponse $response)
     {
         if ($response->user_id !== Auth::id()) {

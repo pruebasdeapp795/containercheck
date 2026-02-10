@@ -38,6 +38,9 @@ Route::middleware(['auth', 'role:control_riesgo'])->prefix('control-riesgo')->na
     Route::post('/inspecciones/{response}/fase', [App\Http\Controllers\ControlRiesgo\FormResponseController::class, 'savePhase'])->name('inspecciones.savePhase');
     Route::post('/inspecciones/{response}/finalizar', [App\Http\Controllers\ControlRiesgo\FormResponseController::class, 'store'])->name('store');
 
+    // API endpoint for searching users by cedula
+    Route::get('/api/search-user/{cedula}', [App\Http\Controllers\ControlRiesgo\FormResponseController::class, 'searchUserByCedula'])->name('api.searchUser');
+
     Route::get('/reportes', [App\Http\Controllers\ControlRiesgo\FormResponseController::class, 'history'])->name('reportes');
     Route::get('/reportes/{response}', [App\Http\Controllers\ControlRiesgo\FormResponseController::class, 'show'])->name('reportes.show');
 });
