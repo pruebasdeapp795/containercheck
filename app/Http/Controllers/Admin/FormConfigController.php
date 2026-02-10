@@ -44,6 +44,38 @@ class FormConfigController extends Controller
         return back()->with('success', 'Versión activada.');
     }
 
+    public function duplicate(FormVersion $version)
+    {
+        // Crear una nueva versión basada en la versión original
+        $newVersion = FormVersion::create([
+            'version' => $version->version . ' - Copia',
+            'is_active' => false
+        ]);
+
+        // Copiar todas las fases
+        foreach ($version->phases as $phase) {
+            $newPhase = $newVersion->phases()->create([
+                'name' => $phase->name,
+                'order' => $phase->order,
+                'is_visible' => $phase->is_visible ?? true
+            ]);
+
+            // Copiar todos los campos de cada fase
+            foreach ($phase->fields as $field) {
+                $newPhase->fields()->create([
+                    'label' => $field->label,
+                    'type' => $field->type,
+                    'options' => $field->options,
+                    'rejection_value' => $field->rejection_value,
+                    'order' => $field->order,
+                    'is_visible' => $field->is_visible ?? true
+                ]);
+            }
+        }
+
+        return redirect()->route('admin.forms.show', $newVersion->id)->with('success', 'Versión duplicada con éxito. Ahora puedes modificarla.');
+    }
+
     public function storePhase(Request $request, FormVersion $version)
     {
         $request->validate(['name' => 'required|string']);
@@ -128,5 +160,27 @@ class FormConfigController extends Controller
         }
 
         return response()->json(['success' => true]);
+    }
+
+    public function deletePhase(Phase $phase)
+    {
+        // Verificar que la versión no esté activa
+        if ($phase->formVersion->is_active) {
+            return back()->with('error', 'No puedes eliminar fases de una versión activa.');
+        }
+
+        $phase->delete();
+        return back()->with('success', 'Fase eliminada con éxito.');
+    }
+
+    public function deleteField(Field $field)
+    {
+        // Verificar que la versión no esté activa
+        if ($field->phase->formVersion->is_active) {
+            return back()->with('error', 'No puedes eliminar campos de una versión activa.');
+        }
+
+        $field->delete();
+        return back()->with('success', 'Campo eliminado con éxito.');
     }
 }

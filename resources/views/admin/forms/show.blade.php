@@ -67,7 +67,7 @@
 @endpush
 
 @section('content')
-  
+
     <div class="container mt-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
@@ -93,6 +93,9 @@
         @if(session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif
+        @if(session('error'))
+            <div class="alert alert-danger">{{ session('error') }}</div>
+        @endif
 
         <div class="mt-4" id="phases-container">
             @foreach($version->phases as $phase)
@@ -114,6 +117,16 @@
                                 data-bs-target="#newField{{ $phase->id }}">
                                 <i class="bi bi-plus"></i> Añadir Campo
                             </button>
+                            @if(!$version->is_active)
+                                <form action="{{ route('admin.forms.phase.delete', $phase->id) }}" method="POST"
+                                    onsubmit="return confirm('¿Estás seguro de eliminar esta fase y todos sus campos?');"
+                                    class="m-0">
+                                    @csrf @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar fase">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            @endif
                         </div>
                     </div>
                     <div class="card-body p-0">
@@ -127,10 +140,21 @@
                                             @if(!$field->is_visible) <small class="text-muted">(Oculto)</small> @endif
                                         </span>
                                     </div>
-                                    <button class="btn btn-sm btn-link pe-3" data-bs-toggle="modal"
-                                        data-bs-target="#editField{{ $field->id }}">
-                                        <i class="bi bi-pencil"></i>
-                                    </button>
+                                    <div class="d-flex gap-1">
+                                        <button class="btn btn-sm btn-link" data-bs-toggle="modal"
+                                            data-bs-target="#editField{{ $field->id }}">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        @if(!$version->is_active)
+                                            <form action="{{ route('admin.forms.field.delete', $field->id) }}" method="POST"
+                                                onsubmit="return confirm('¿Estás seguro de eliminar este campo?');" class="m-0">
+                                                @csrf @method('DELETE')
+                                                <button type="submit" class="btn btn-sm btn-link text-danger" title="Eliminar campo">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </div>
                                 </div>
 
                                 <!-- Modal Edit Field -->
@@ -141,8 +165,7 @@
                                             <div class="modal-content">
                                                 <div class="modal-header">
                                                     <h5>Editar Campo</h5>
-                                                    <button type="button" class="btn-close"
-                                                        data-bs-dismiss="modal"></button>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                                 </div>
                                                 <div class="modal-body">
                                                     <div class="mb-3">
@@ -153,12 +176,18 @@
                                                     <div class="mb-3">
                                                         <label class="form-label">Tipo</label>
                                                         <select name="type" class="form-select">
-                                                    <option value="text" {{ $field->type == 'text' ? 'selected' : '' }}>Texto</option>
-                                                    <option value="numeric" {{ $field->type == 'numeric' ? 'selected' : '' }}>Numérico</option>
-                                                    <option value="date" {{ $field->type == 'date' ? 'selected' : '' }}>Fecha</option>
-                                                    <option value="time" {{ $field->type == 'time' ? 'selected' : '' }}>Hora</option>
-                                                    <option value="photo" {{ $field->type == 'photo' ? 'selected' : '' }}>Foto</option>
-                                                    <option value="select" {{ $field->type == 'select' ? 'selected' : '' }}>Selección</option>
+                                                            <option value="text" {{ $field->type == 'text' ? 'selected' : '' }}>Texto
+                                                            </option>
+                                                            <option value="numeric" {{ $field->type == 'numeric' ? 'selected' : '' }}>
+                                                                Numérico</option>
+                                                            <option value="date" {{ $field->type == 'date' ? 'selected' : '' }}>Fecha
+                                                            </option>
+                                                            <option value="time" {{ $field->type == 'time' ? 'selected' : '' }}>Hora
+                                                            </option>
+                                                            <option value="photo" {{ $field->type == 'photo' ? 'selected' : '' }}>Foto
+                                                            </option>
+                                                            <option value="select" {{ $field->type == 'select' ? 'selected' : '' }}>
+                                                                Selección</option>
                                                         </select>
                                                     </div>
                                                     <div class="mb-3 options-container"
@@ -178,8 +207,8 @@
                                                             exacto, la inspección se cancelará automáticamente.</small>
                                                     </div>
                                                     <div class="form-check">
-                                                        <input class="form-check-input" type="checkbox" name="is_visible"
-                                                            value="1" id="visField{{ $field->id }}" {{ $field->is_visible ? 'checked' : '' }}>
+                                                        <input class="form-check-input" type="checkbox" name="is_visible" value="1"
+                                                            id="visField{{ $field->id }}" {{ $field->is_visible ? 'checked' : '' }}>
                                                         <label class="form-check-label"
                                                             for="visField{{ $field->id }}">Visible</label>
                                                     </div>
@@ -211,8 +240,7 @@
                                 <div class="modal-body">
                                     <div class="mb-3">
                                         <label class="form-label">Nombre de la Fase</label>
-                                        <input type="text" name="name" class="form-control"
-                                            value="{{ $phase->name }}" required>
+                                        <input type="text" name="name" class="form-control" value="{{ $phase->name }}" required>
                                     </div>
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="is_visible" value="1"
@@ -241,8 +269,8 @@
                                 <div class="modal-body">
                                     <div class="mb-3">
                                         <label class="form-label">Etiqueta del Campo</label>
-                                        <input type="text" name="label" class="form-control"
-                                            placeholder="Ej: Humedad del suelo" required>
+                                        <input type="text" name="label" class="form-control" placeholder="Ej: Humedad del suelo"
+                                            required>
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label">Tipo de Campo</label>
@@ -263,8 +291,7 @@
                                     <div class="mb-3 rejection-container" style="display:none">
                                         <label class="form-label text-danger fw-bold">Valor de Rechazo
                                             (Opcional)</label>
-                                        <input type="text" name="rejection_value" class="form-control"
-                                            placeholder="Ej: No">
+                                        <input type="text" name="rejection_value" class="form-control" placeholder="Ej: No">
                                         <small class="text-muted">Si el usuario selecciona este valor exacto, la
                                             inspección se cancelará automáticamente.</small>
                                     </div>
@@ -286,8 +313,7 @@
                     @csrf
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5>Nueva Fase</h5><button type="button" class="btn-close"
-                                data-bs-dismiss="modal"></button>
+                            <h5>Nueva Fase</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
                         <div class="modal-body">
                             <input type="text" name="name" class="form-control"
@@ -303,7 +329,7 @@
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('DOMContentLoaded', function () {
                 var el = document.getElementById('phases-container');
                 if (el) {
                     Sortable.create(el, {
@@ -311,10 +337,10 @@
                         animation: 150,
                         onEnd: function (evt) {
                             var order = [];
-                            document.querySelectorAll('.phase-card').forEach(function(card) {
+                            document.querySelectorAll('.phase-card').forEach(function (card) {
                                 order.push(card.getAttribute('data-id'));
                             });
-                            
+
                             fetch('{{ route('admin.forms.phases.reorder') }}', {
                                 method: 'POST',
                                 headers: {
@@ -323,18 +349,18 @@
                                 },
                                 body: JSON.stringify({ order: order })
                             })
-                            .then(response => response.json())
-                            .then(data => {
-                                if(data.success) {
-                                    console.log('Orden actualizado');
-                                } else {
-                                    alert('Error al guardar el orden');
-                                }
-                            })
-                            .catch(error => {
-                                console.error('Error:', error);
-                                alert('Error de conexión');
-                            });
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        console.log('Orden actualizado');
+                                    } else {
+                                        alert('Error al guardar el orden');
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Error:', error);
+                                    alert('Error de conexión');
+                                });
                         }
                     });
                 }

@@ -80,10 +80,13 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         Route::post('/version', [App\Http\Controllers\Admin\FormConfigController::class, 'storeVersion'])->name('version.store');
         Route::get('/{version}', [App\Http\Controllers\Admin\FormConfigController::class, 'show'])->name('show');
         Route::post('/{version}/activate', [App\Http\Controllers\Admin\FormConfigController::class, 'activate'])->name('activate');
+        Route::post('/{version}/duplicate', [App\Http\Controllers\Admin\FormConfigController::class, 'duplicate'])->name('duplicate');
         Route::post('/{version}/phase', [App\Http\Controllers\Admin\FormConfigController::class, 'storePhase'])->name('phase.store');
         Route::put('/phase/{phase}', [App\Http\Controllers\Admin\FormConfigController::class, 'updatePhase'])->name('phase.update');
+        Route::delete('/phase/{phase}', [App\Http\Controllers\Admin\FormConfigController::class, 'deletePhase'])->name('phase.delete');
         Route::post('/phase/{phase}/field', [App\Http\Controllers\Admin\FormConfigController::class, 'storeField'])->name('field.store');
         Route::put('/field/{field}', [App\Http\Controllers\Admin\FormConfigController::class, 'updateField'])->name('field.update');
+        Route::delete('/field/{field}', [App\Http\Controllers\Admin\FormConfigController::class, 'deleteField'])->name('field.delete');
         Route::post('/reorder-phases', [App\Http\Controllers\Admin\FormConfigController::class, 'reorderPhases'])->name('phases.reorder');
         Route::post('/reorder-fields', [App\Http\Controllers\Admin\FormConfigController::class, 'reorderFields'])->name('fields.reorder');
     });

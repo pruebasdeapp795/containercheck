@@ -59,6 +59,12 @@
                                 <a href="{{ route('admin.forms.show', $v->id) }}" class="btn btn-sm btn-outline-secondary">
                                     <i class="bi bi-gear"></i> Configurar
                                 </a>
+                                <form action="{{ route('admin.forms.duplicate', $v->id) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    <button type="submit" class="btn btn-sm btn-outline-primary" title="Copiar esta versión">
+                                        <i class="bi bi-copy"></i> Copiar
+                                    </button>
+                                </form>
                                 @if(!$v->is_active)
                                     <form action="{{ route('admin.forms.activate', $v->id) }}" method="POST" class="d-inline">
                                         @csrf
