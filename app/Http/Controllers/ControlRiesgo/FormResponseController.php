@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\User;
 use App\Models\InspectionSignature;
 use Illuminate\Support\Facades\Hash;
+use App\Models\Field;
 
 class FormResponseController extends Controller
 {
@@ -192,6 +193,19 @@ class FormResponseController extends Controller
             'signed_at' => now(),
             'status' => 'completed'
         ]);
+
+        // Automatically calculate and save "Hora de Terminación Inspección" if the field exists
+        $endTimeField = Field::where('label', 'Hora de Terminación Inspección')
+            ->whereHas('phase', function ($query) use ($response) {
+                $query->where('form_version_id', $response->form_version_id);
+            })->first();
+
+        if ($endTimeField) {
+            FieldResponse::updateOrCreate(
+                ['form_response_id' => $response->id, 'field_id' => $endTimeField->id],
+                ['value' => now()->format('H:i')]
+            );
+        }
 
         return redirect()->route('control-riesgo.reportes')->with('success', 'Inspección realizada con éxito.');
     }

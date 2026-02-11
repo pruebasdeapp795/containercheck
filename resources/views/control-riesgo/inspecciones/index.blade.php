@@ -293,6 +293,9 @@
                         {{-- Default rendering for other phases --}}
                         <div class="row g-3">
                             @foreach($phase->fields as $field)
+                                @if(!$field->is_visible)
+                                    @continue
+                                @endif
                                 @php
                                     $fieldVal = $response->fieldResponses->where('field_id', $field->id)->first()?->value;
                                     $isLocked = $index <= $response->last_phase_completed;

@@ -243,6 +243,15 @@
         <button class="btn-print" onclick="window.print()">Descargar Reporte PDF</button>
     </div>
 
+    @php 
+        $startTimeField = $response->formVersion->phases->flatMap->fields->where('label', 'Inicio de Inspección:')->first();
+        $endTimeField = $response->formVersion->phases->flatMap->fields->where('label', 'Hora de Terminación Inspección')->first();
+        $horaInicio = $response->fieldResponses->where('field_id', $startTimeField?->id)->first()?->value ?? '---';
+        $horaFin = $response->fieldResponses->where('field_id', $endTimeField?->id)->first()?->value ?? '---';
+        
+        $photos = []; 
+    @endphp
+
     {{-- Header --}}
     <table class="header-table">
         <tr>
@@ -257,12 +266,12 @@
             <td style="width: 25%;" class="header-info-box">
                 <strong>CÓDIGO:</strong> FCR16<br>
                 <strong>REVISIÓN:</strong> 03<br>
-                <strong>FECHA:</strong> {{ \Carbon\Carbon::parse($response->created_at)->format('d/m/Y') }}
+                <strong>FECHA:</strong> {{ \Carbon\Carbon::parse($response->created_at)->format('d/m/Y') }}<br>
+                <strong>H. INICIO:</strong> {{ $horaInicio }} | 
+                <strong>H. FINAL:</strong> {{ $horaFin }}
             </td>
         </tr>
     </table>
-
-    @php $photos = []; @endphp
 
     @foreach($response->formVersion->phases as $phase)
         @php
