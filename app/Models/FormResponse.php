@@ -8,6 +8,10 @@ class FormResponse extends Model
 {
     protected $fillable = ['user_id', 'form_version_id', 'status', 'last_phase_completed', 'signature', 'signed_at'];
 
+    protected $casts = [
+        'signed_at' => 'datetime',
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class);

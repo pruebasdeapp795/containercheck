@@ -13,6 +13,8 @@ use App\Models\User;
 use App\Models\InspectionSignature;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Field;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\InspectionRejected;
 
 class FormResponseController extends Controller
 {
@@ -174,6 +176,13 @@ class FormResponseController extends Controller
 
         if ($request->has('is_rejected') && $request->is_rejected == '1') {
             $response->update(['status' => 'rejected', 'signed_at' => now()]);
+
+            // Enviar correo de notificación por rechazo
+            $emails = config('mail.rejection_emails');
+            if (!empty($emails)) {
+                $recipientList = array_map('trim', explode(',', $emails));
+                Mail::to($recipientList)->send(new InspectionRejected($response));
+            }
         }
 
         return response()->json(['success' => true]);
