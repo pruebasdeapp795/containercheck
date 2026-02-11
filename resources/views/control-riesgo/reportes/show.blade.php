@@ -6,583 +6,438 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reporte Inspección - {{ $response->id }}</title>
     <style>
+        :root {
+            --primary-blue: #003366;
+            --soft-gray: #f1f5f9;
+            --border-color: #e2e8f0;
+            --text-dark: #0f172a;
+            --text-muted: #475569;
+            --label-bg: #f8fafc;
+        }
+
+        @page {
+            size: A4;
+            margin: 1cm;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            font-size: 12px;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-size: 9px;
+            line-height: 1.3;
+            color: var(--text-dark);
+            margin: 0;
+            padding: 0;
+            background-color: #fff;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
         }
 
-        @media print {
-            .print-btn {
-                display: none;
-            }
+        /* Utilidades */
+        .no-print {
+            text-align: right;
+            margin-bottom: 15px;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: -1px;
-        }
-
-        th,
-        td {
-            border: 1px solid #000;
-            padding: 6px;
-            text-align: left;
-            vertical-align: middle;
-        }
-
-        .header-bg {
-            background-color: #f2f2f2;
-            font-weight: bold;
-            text-align: center;
-        }
-
-        .logo-cell {
-            width: 20%;
-            text-align: center;
-        }
-
-        .title-cell {
-            width: 60%;
-            text-align: center;
-            font-size: 1.2em;
-            font-weight: bold;
-        }
-
-        .info-cell {
-            width: 20%;
-            text-align: center;
-            font-weight: bold;
-        }
-
-        .label {
-            background-color: #e0e0e0;
-            font-weight: bold;
-            width: 15%;
-            text-align: center;
-        }
-
-        .col-no {
-            width: 35px;
-            background-color: #e0e0e0;
-            font-weight: bold;
-            text-align: center;
-        }
-
-        .input-box {
-            width: 35%;
-        }
-
-        .section-header {
-            background-color: #e0e0e0;
-            font-weight: bold;
-            text-transform: uppercase;
-            text-align: center;
-        }
-
-        .field-label {
-            font-weight: bold;
-            background-color: #f9f9f9;
-            width: 20%;
-        }
-
-        .print-btn {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 10px 20px;
-            background: #8a70d6;
-            color: white;
+        .btn-print {
+            padding: 8px 18px;
+            background: var(--primary-blue);
+            color: #fff;
             border: none;
-            border-radius: 5px;
+            border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
+            transition: opacity 0.2s;
         }
 
         @media print {
-            .print-btn {
+            .no-print {
                 display: none;
             }
 
             body {
-                margin: 0;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
             }
+
+            .phase-header {
+                background-color: var(--primary-blue) !important;
+                color: #ffffff !important;
+            }
+
+            .data-label {
+                background-color: var(--label-bg) !important;
+            }
+        }
+
+        /* Encabezado Estilo Moderno */
+        .header-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+            border-bottom: 2px solid var(--primary-blue);
+        }
+
+        .header-table td {
+            border: none;
+            padding: 10px 5px;
+            vertical-align: middle;
+        }
+
+        .header-logo {
+            width: 120px;
+        }
+
+        .header-title {
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--primary-blue);
+            text-transform: uppercase;
+        }
+
+        .header-info-box {
+            font-size: 8px;
+            text-align: right;
+            color: var(--text-muted);
+            line-height: 1.1;
+        }
+
+        /* Secciones (Phases) */
+        .phase-header {
+            background-color: var(--primary-blue);
+            color: #ffffff;
+            font-weight: bold;
+            text-transform: uppercase;
+            padding: 5px 12px;
+            margin: 12px 0 0 0;
+            font-size: 10px;
+            letter-spacing: 1px;
+            border-radius: 4px 4px 0 0;
+        }
+
+        /* Grid de Datos Estilo Moderno */
+        .data-grid {
+            display: flex;
+            flex-wrap: wrap;
+            border-top: 1px solid var(--border-color);
+            border-left: 1px solid var(--border-color);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .data-item {
+            display: flex;
+            width: 50%;
+            border-bottom: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-color);
+            box-sizing: border-box;
+            min-height: 24px;
+        }
+
+        .data-item.full-width {
+            width: 100%;
+            border-right: none;
+        }
+
+        .data-item:nth-child(2n) {
+            border-right: none;
+        }
+
+        .data-item:last-child {
+            border-right: none;
+        }
+
+        .data-label {
+            width: 140px;
+            font-weight: bold;
+            background: var(--label-bg);
+            border-right: 1px solid var(--border-color);
+            padding: 5px 8px;
+            color: var(--text-muted);
+            font-size: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .data-value {
+            flex: 1;
+            padding: 5px 8px;
+            background: #fff;
+            color: var(--text-dark);
+            font-weight: 500;
+            word-break: break-word;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Tabla de Personal */
+        .personal-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 5px;
+            border-radius: 4px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .personal-table th {
+            background: var(--soft-gray);
+            color: var(--primary-blue);
+            font-size: 9px;
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .personal-table td {
+            padding: 4px 8px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* Fotos */
+        /* Sección QR */
+        .qr-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            border: 1px dashed var(--primary-blue);
+            border-radius: 8px;
+            margin: 10px 0;
+            background-color: #f8fafc;
+        }
+
+        .qr-container {
+            text-align: center;
+            padding-right: 15px;
+            border-right: 1px solid var(--border-color);
+        }
+
+        .qr-img {
+            width: 80px;
+            height: 80px;
+        }
+
+        .qr-text {
+            padding-left: 15px;
+            flex: 1;
+        }
+
+        .qr-title {
+            font-size: 10px;
+            font-weight: bold;
+            color: var(--primary-blue);
+            margin-bottom: 3px;
+        }
+
+        .qr-desc {
+            font-size: 8px;
+            color: var(--text-muted);
+            line-height: 1.2;
         }
     </style>
 </head>
 
 <body>
-    @php
-        // Helper to find value by label substring
-        $getValue = function ($labelPart) use ($response) {
-            foreach ($response->formVersion->phases as $phase) {
-                foreach ($phase->fields as $field) {
-                    // Check if label contains the search part (case insensitive)
-                    if (str_contains(strtoupper($field->label), strtoupper($labelPart))) {
-                        $resp = $response->fieldResponses->where('field_id', $field->id)->first();
-                        return $resp ? $resp->value : '';
-                    }
-                }
-            }
-            return '';
-        };
+    <div class="no-print">
+        <button class="btn-print" onclick="window.print()">Descargar Reporte PDF</button>
+    </div>
 
-        // Helper specifically for Phase 13 (Personal del Cargue)
-        $getPersonalSignatures = function () use ($response) {
-            return $response->inspectionSignatures;
-        };
+    {{-- Header --}}
+    <table class="header-table">
+        <tr>
+            <td style="width: 25%;">
+                <img src="{{ asset('imagenes/logo.png') }}" class="header-logo" alt="Logo">
+            </td>
+            <td class="header-title">
+                Reporte de Inspección de Contenedor<br>
+                <span style="font-size: 10px; color: #666; font-weight: normal;">ID: #{{ $response->id }} | Versión:
+                    {{ $response->formVersion->version }}</span>
+            </td>
+            <td style="width: 25%;" class="header-info-box">
+                <strong>CÓDIGO:</strong> FCR16<br>
+                <strong>REVISIÓN:</strong> 03<br>
+                <strong>FECHA:</strong> {{ \Carbon\Carbon::parse($response->created_at)->format('d/m/Y') }}
+            </td>
+        </tr>
+    </table>
+
+    @php $photos = []; @endphp
+
+    @foreach($response->formVersion->phases as $phase)
+        @php
+            $isPersonal = str_contains(strtoupper($phase->name), 'PERSONAL DEL CARGUE');
+            $phaseFields = $phase->fields;
+            $responses = $response->fieldResponses;
+        @endphp
+
+        <div class="phase-header">{{ $phase->name }}</div>
+
+        @if($isPersonal)
+            <table class="personal-table">
+                <thead>
+                    <tr>
+                        <th style="width: 30%;">Nombre</th>
+                        <th style="width: 20%;">Cédula</th>
+                        <th style="width: 20%;">Cargo</th>
+                        <th style="width: 10%;">Chaleco</th>
+                        <th style="width: 20%;">Firma</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($response->inspectionSignatures as $sig)
+                        <tr>
+                            <td>{{ $sig->user->name }}</td>
+                            <td>{{ $sig->user->cedula }}</td>
+                            <td>{{ $sig->role_in_inspection }}</td>
+                            <td style="text-align: center;">{{ $sig->vest_number }}</td>
+                            <td style="text-align: center;">
+                                @if($sig->signature)
+                                    <img src="{{ $sig->signature }}" style="max-height: 30px;">
+                                @else
+                                    <span style="color:#ccc">---</span>
+                                @endif
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        @endif
+
+        {{-- Mostrar campos adicionales de la fase (incluyendo el procesamiento de fotos para el QR) --}}
+        @php
+            $personalFieldIds = [57, 58, 59, 65];
+            $fieldsToShow = $isPersonal
+                ? $phaseFields->whereNotIn('id', $personalFieldIds)
+                : $phaseFields;
+        @endphp
+
+        @if($fieldsToShow->count() > 0)
+            <div class="data-grid" @if($isPersonal) style="margin-top: 5px; border-top: none;" @endif>
+                @foreach($fieldsToShow as $field)
+                    @php
+                        $fieldResponse = $responses->where('field_id', $field->id)->first();
+                        $value = $fieldResponse ? $fieldResponse->value : '';
+
+                        // Si el campo es una foto, simplemente lo saltamos en el grid 
+                        // (el QR lo detectará automáticamente de las respuestas)
+                        if ($field->type === 'photo' || !$value) {
+                            continue;
+                        }
+
+                        $isFullWidth = strlen($value) > 60 || $field->type === 'textarea';
+                    @endphp
+
+                    <div class="data-item {{ $isFullWidth ? 'full-width' : '' }}">
+                        <div class="data-label">{{ strtoupper($field->label) }}</div>
+                        <div class="data-value">
+                            @if($field->type === 'date' && $value)
+                                <strong>{{ \Carbon\Carbon::parse($value)->format('d/m/Y') }}</strong>
+                            @elseif($field->type === 'time' && $value)
+                                <strong>{{ \Carbon\Carbon::parse($value)->format('H:i') }}</strong>
+                            @else
+                                <strong>{{ is_array(json_decode($value)) ? implode(', ', json_decode($value)) : $value }}</strong>
+                            @endif
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        @endif
+    @endforeach
+
+    @php
+        $hasPhotos = false;
+        foreach ($response->fieldResponses as $fr) {
+            if ($fr->field->type === 'photo' && $fr->value) {
+                $hasPhotos = true;
+                break;
+            }
+        }
     @endphp
 
-    <button onclick="window.print()" class="print-btn">Imprimir Reporte</button>
+    @if($hasPhotos)
+        <div class="phase-header">Soporte Fotográfico Digital</div>
+        <div class="qr-section">
+            <div class="qr-container">
+                @php
+                    $galleryUrl = route('reportes.gallery', $response->id);
+                    $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" . urlencode($galleryUrl);
+                @endphp
+                <img src="{{ $qrUrl }}" class="qr-img" alt="QR Gallery">
+            </div>
+            <div class="qr-text">
+                <div class="qr-title">ESCANEÉ PARA VER REGISTRO FOTOGRÁFICO</div>
+                <div class="qr-desc">
+                    Por motivos de optimización y claridad en el reporte impreso, las fotografías de esta inspección se
+                    encuentran almacenadas en nuestro servidor seguro. <br>
+                    <strong>Escanee el código QR</strong> o ingrese a: <br>
+                    <span style="color: var(--primary-blue); font-size: 8px;">{{ $galleryUrl }}</span>
+                </div>
+            </div>
+        </div>
+    @endif
 
-    <table>
-        <tbody>
+    <div class="signatures-area">
+        <style>
+            .signatures-area {
+                margin-top: 15px;
+            }
+
+            .sig-table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+            .sig-block {
+                width: 50%;
+                text-align: center;
+                padding: 10px 20px;
+            }
+
+            .sig-img {
+                max-height: 50px;
+                max-width: 150px;
+                margin-bottom: 5px;
+            }
+
+            .sig-line {
+                border-top: 1.5px solid var(--text-dark);
+                width: 80%;
+                margin: 0 auto 8px;
+            }
+
+            .sig-name {
+                font-weight: bold;
+                font-size: 9px;
+                text-transform: uppercase;
+            }
+
+            .sig-meta {
+                color: var(--text-muted);
+                font-size: 8px;
+            }
+        </style>
+        <table class="sig-table">
             <tr>
-                <td class="logo-cell" rowspan="3">
-                    <img src="https://tubosa.com/wp-content/uploads/2025/02/tubosa-header-logo.png" width="150"
-                        alt="TUBOSA">
+                <td class="sig-block">
+                    @if($response->signature)
+                        <img src="{{ $response->signature }}" class="sig-img">
+                    @else
+                        <div style="height: 50px;"></div>
+                    @endif
+                    <div class="sig-line"></div>
+                    <div class="sig-name">{{ Auth::user()->name }}</div>
+                    <div class="sig-meta">Inspector / Responsable<br>CC: {{ Auth::user()->cedula }}</div>
                 </td>
-                <td class="title-cell" rowspan="3">REPORTE INSPECCIÓN DEL CONTENEDOR</td>
-                <td class="info-cell">FCR16</td>
-            </tr>
-            <tr>
-                <td class="info-cell">Actualización N°2</td>
-            </tr>
-            <tr>
-                <td class="info-cell">29 de Octubre 2025</td>
-            </tr>
-        </tbody>
-    </table>
-
-    <table>
-        <tbody>
-            <tr>
-                <td class="label">Fecha:</td>
-                <td class="input-box">{{ $getValue('Fecha') }}</td>
-                <td class="label">Inicio Inspección:</td>
-                <td class="input-box">{{ $getValue('Inicio') }}</td> <!-- Asumiendo que hay campo Hora Inicio -->
-            </tr>
-            <tr>
-                <td class="label">No Contenedor:</td>
-                <td class="input-box">{{ $getValue('Numero de contenedor') }}</td>
-                <td class="label">Fin Inspección:</td>
-                <td class="input-box">
-                    {{ $response->signed_at ? \Carbon\Carbon::parse($response->signed_at)->format('H:i') : '' }}</td>
-            </tr>
-            <tr>
-                <td class="label">Tipo de operación</td>
-                <td class="input-box" colspan="3">{{ $getValue('Operación') }}</td>
-            </tr>
-        </tbody>
-    </table>
-
-    <table>
-        <thead>
-            <tr>
-                <th class="col-no">NO</th>
-                <th colspan="4" class="section-header">OBSERVACIONES SOBRE EL CONDUCTOR</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td class="col-no">1</td>
-                <td class="col-no" colspan="4">A U D I T O R I A C O N D U C T O R</td>
-            </tr>
-
-            <tr>
-                <td class="col-no" rowspan="2">1.1</td>
-                <td class="field-label" style="width: 25%;">NOMBRE DEL CONDUCTOR:</td>
-                <td colspan="3">{{ $getValue('Nombre del conductor') }}</td>
-            </tr>
-            <tr>
-                <td class="field-label">CÉDULA:</td>
-                <td style="width: 25%;">{{ $getValue('C.C') }}</td>
-                <td class="field-label" style="width: 10%;">DE:</td>
-                <td>{{ $getValue('De') }}</td> <!-- Verificar si existe campo 'De' en cedula -->
-            </tr>
-
-            <tr>
-                <td class="col-no">1.2</td>
-                <td class="field-label">Seguridad social y salud: ARL</td>
-                <td>{{ $getValue('ARL') }}</td>
-                <td class="field-label">EPS:</td>
-                <td>{{ $getValue('EPS') }}</td>
-            </tr>
-
-            <tr>
-                <td class="col-no">1.3</td>
-                <td class="field-label">Describa el estado anímico del conductor:</td>
-                <td colspan="3">{{ $getValue('estado anímico') }}</td>
-            </tr>
-
-            <tr>
-                <td class="col-no">1.4</td>
-                <td class="field-label">Tiene Licencia de Conducción? (PASE)</td>
-                <td>{{ $getValue('Licencia') }}</td>
-                <td class="field-label">Tiene tarjeta de propiedad del vehículo?</td>
-                <td>{{ $getValue('tarjeta de propiedad') }}</td>
-            </tr>
-
-            <tr>
-                <td class="col-no">1.5</td>
-                <td class="field-label">Tiene seguro obligatorio del vehículo vigente?:</td>
-                <td>{{ $getValue('seguro obligatorio') }}</td>
-                <td class="field-label">Tiene TECNICOMECANICA vigente?:</td>
-                <td>{{ $getValue('TECNICOMECANICA') }}</td>
-            </tr>
-        </tbody>
-
-        <thead>
-            <tr>
-                <th class="col-no">NO</th>
-                <th colspan="4" class="section-header">OBSERVACIONES SOBRE LA UNIDAD DE TRANSPORTE</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td class="col-no">2</td>
-                <td class="col-no" colspan="4">AUDITORIA CABEZOTE - TRAILER</td>
-            </tr>
-            <tr>
-                <td class="col-no">2.1</td>
-                <td class="field-label" style="width: 35%;">Llantas en buen estado?*:</td>
-                <td colspan="3">{{ $getValue('Llantas en buen estado') }}</td>
-            </tr>
-            <tr>
-                <td class="col-no">2.2</td>
-                <td class="field-label" style="width: 25%;">Las luces funcionan correctamente?*:</td>
-                <td colspan="3">{{ $getValue('luces funcionan') }}</td>
-            </tr>
-            <tr>
-                <td class="col-no">2.3</td>
-                <td class="field-label" style="width: 25%;">Posee llanta de repuesto?</td>
-                <td colspan="3">{{ $getValue('llanta de repuesto') }}</td>
-            </tr>
-        </tbody>
-
-        <thead>
-            <tr>
-                <th class="col-no">NO</th>
-                <th colspan="4" class="section-header">OBSERVACIONES SOBRE LA UNIDAD DE CARGA</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td class="col-no">3</td>
-                <td class="col-no" colspan="4">IDENTIFICACIÓN</td>
-            </tr>
-            <tr>
-                <td class="col-no">3.1</td>
-                <td class="field-label" style="width: 25%;">Numero del contenedor es diferente en uno o mas de los 5
-                    lados visibles *</td>
-                <td colspan="3">{{ $getValue('Numero del contenedor es diferente') }}</td>
-            </tr>
-            <tr>
-                <td class="col-no">3.2</td>
-                <td class="field-label" style="width: 25%;">Numero del precinto de llegada contenedor vacío coincide con
-                    el de salida del patio contenedores?? Numero: </td>
-                <td colspan="3">{{ $getValue('Numero del precinto de llegada') }}</td>
-            </tr>
-
-            <tr>
-                <td class="col-no">4</td>
-                <td class="col-no" colspan="4">PUERTAS INTERIOR Y EXTERIOR</td>
-            </tr>
-            <!-- Seccion 4 campos -->
-            <tr>
-                <td class="col-no">4.1</td>
-                <td class="field-label" style="width: 25%;">Adhesivo o pegante nuevo en uniones de las laminas (No
-                    reportadas en comodato e
-                    inspección transporte.) </td>
-                <td colspan="3">{{ $getValue('Adhesivo o pegante nuevo en uniones de las laminas') }}</td>
-            </tr>
-            <tr>
-                <td class="col-no">4.2</td>
-                <td class="field-label" style="width: 25%;">Marcas o quemaduras recientes de soldadura (No reportadas en
-                    comodato e
-                    inspección transportista)</td>
-                <td colspan="3">{{ $getValue('Marcas o quemaduras recientes de soldadura (No reportadas') }}</td>
-            </tr>
-            <tr>
-                <td class="col-no">4.3</td>
-                <td class="field-label" style="width: 25%;">Pintura nueva en partes o parches (No reportadas en comodato
-                    e inspección
-                    transportista)</td>
-                <td colspan="3">{{ $getValue('Pintura nueva en partes') }}</td>
-            </tr>
-            <tr>
-                <td class="col-no">4.4</td>
-                <td class="field-label" style="width: 25%;">Ondulaciones internas y externas desiguales en tamaño y
-                    altura *</td>
-                <td colspan="3">{{ $getValue('Ondulaciones internas') }}</td>
-            </tr>
-            <tr>
-                <td class="col-no">4.5</td>
-                <td class="field-label" style="width: 25%;">Canales superiores e inferiores internos con tapas *</td>
-                <td colspan="3">{{ $getValue('Canales superiores') }}</td>
-            </tr>
-            <tr>
-                <td class="col-no">4.6</td>
-                <td class="field-label" style="width: 25%;">Vigas y travesaños con sonido metálico disparejo (Diferente
-                    en algún punto )*
-                </td>
-                <td colspan="3">{{ $getValue('Vigas y travesaños') }}</td>
-            </tr>
-            <tr>
-                <td class="col-no">4.7</td>
-                <td class="field-label" style="width: 25%;">Remaches y tuercas de los seguros de las manijas ocultos y
-                    soldados en parte
-                    interna *</td>
-                <td colspan="3">{{ $getValue('Remaches y tuercas') }}</td>
-            </tr>
-            <tr>
-                <td class="col-no">4.8</td>
-                <td class="field-label" style="width: 25%;">Áreas aledañas a remaches o bisagras con muestra de golpes,
-                    pinturas o forcejeo
-                </td>
-                <td colspan="3">{{ $getValue('Áreas aledañas') }}</td>
-            </tr>
-            <tr>
-                <td class="col-no">4.9</td>
-                <td class="field-label" style="width: 25%;">Olores a pintura, soldadura, madera quemada, pegante,
-                    materiales de relleno,
-                    grasa, etc.</td>
-                <td colspan="3">{{ $getValue('Olores a pintura') }}</td>
-            </tr>
-            <tr>
-                <td class="col-no">4.10</td>
-                <td class="field-label" style="width: 25%;">El estado de mecanismos de cierre del contenedor, incluyendo
-                    bisagras, manijas, guía o barra de cierre, Cerrojo es</td>
-                <td colspan="3">{{ $getValue('El estado de mecanismos') }}</td>
-            </tr>
-
-            <tr>
-                <td class="col-no">5</td>
-                <td class="col-no" colspan="4">PISO</td>
-            </tr>
-            <tr>
-                <td class="col-no">5.1</td>
-                <td class="field-label" style="width: 25%;">Esta desnivelado*</td>
-                <td colspan="3">{{ $getValue('Esta desnivelado') }}</td>
-            </tr>
-            <tr>
-                <td class="col-no">5.2</td>
-                <td class="field-label" style="width: 25%;">Se encuentra por encima de nivel de las vigas inferiores *
-                </td>
-                <td colspan="3">{{ $getValue('Se encuentra por encima') }}</td>
-            </tr>
-            <tr>
-                <td class="col-no">5.3</td>
-                <td class="field-label" style="width: 25%;">Reparaciones nuevas con malos acabados (No reportadas en
-                    comodato e inspección
-                    transportista)</td>
-                <td colspan="3">{{ $getValue('Reparaciones nuevas') }}</td>
-            </tr>
-
-            <tr>
-                <td class="col-no">6</td>
-                <td class="col-no" colspan="4">TECHO INTERIOR Y EXTERIOR</td>
-            </tr>
-            <tr>
-                <td class="col-no">6.1</td>
-                <td class="field-label" style="width: 25%;">Los soportes (vigas superiores) se encuentran ocultos *</td>
-                <td colspan="3">{{ $getValue('Los soportes') }}</td>
-            </tr>
-            <tr>
-                <td class="col-no">6.2</td>
-                <td class="field-label" style="width: 25%;">Orificios de ventilación sellados/ocultos *</td>
-                <td colspan="3">{{ $getValue('Orificios de ventilación') }}</td>
-            </tr>
-            <tr>
-                <td class="col-no">6.3</td>
-                <td class="field-label" style="width: 25%;">Techos desnivelado *</td>
-                <td colspan="3">{{ $getValue('Techos desnivelado') }}</td>
-            </tr>
-            <tr>
-                <td class="col-no">6.4</td>
-                <td class="field-label" style="width: 25%;">Marcas o quemaduras recientes de soldadura en el techo (No
-                    reportadas en
-                    comodato e inspección transp)</td>
-                <td colspan="3">{{ $getValue('Marcas o quemaduras recientes de soldadura en el techo') }}</td>
-            </tr>
-            <tr>
-                <td class="col-no">6.5</td>
-                <td class="field-label" style="width: 25%;">Pintura nueva en partes o parches en el techo (No reportadas
-                    en comodato e
-                    inspección transportista)</td>
-                <td colspan="3">
-                    {{ $getValue('Pintura nueva en partes o parches (No reportadas en comodato e inspección transportista)') }}
+                <td class="sig-block">
+                    <div style="height: 50px;"></div>
+                    <div class="sig-line"></div>
+                    <div class="sig-name">Verificación</div>
+                    <div class="sig-meta">Control Riesgos / Seguridad<br>Firma y Sello Autorizado</div>
                 </td>
             </tr>
-
-            <tr>
-                <td class="col-no">7</td>
-                <td class="col-no" colspan="4">CONTENEDOR 40" High Cube</td>
-            </tr>
-            <tr>
-                <td class="col-no">7.1</td>
-                <td class="field-label" style="width: 25%;">Largo exterior: 12,19 m</td>
-                <td colspan="3">{{ $getValue('Largo exterior') }}</td>
-            </tr>
-            <tr>
-                <td class="col-no">7.2</td>
-                <td class="field-label" style="width: 25%;">Ancho exterior: 2,44 m</td>
-                <td colspan="3">{{ $getValue('Ancho exterior') }}</td>
-            </tr>
-            <tr>
-                <td class="col-no">7.3</td>
-                <td class="field-label" style="width: 25%;">Alto exterior: 2,89 m</td>
-                <td colspan="3">{{ $getValue('Alto exterior') }}</td>
-            </tr>
-            <tr>
-                <td class="col-no">7.4</td>
-                <td class="field-label" style="width: 25%;">Largo interior: 12,03 m</td>
-                <td colspan="3">{{ $getValue('Largo interior') }}</td>
-            </tr>
-            <tr>
-                <td class="col-no">7.5</td>
-                <td class="field-label" style="width: 25%;">Ancho interior: 2,35 m</td>
-                <td colspan="3">{{ $getValue('Ancho interior') }}</td>
-            </tr>
-            <tr>
-                <td class="col-no">7.6</td>
-                <td class="field-label" style="width: 25%;">Alto interior: 2,70 m</td>
-                <td colspan="3">{{ $getValue('Alto interior') }}</td>
-            </tr>
-
-            <tr>
-                <td class="col-no">8</td>
-                <td class="col-no" colspan="4">COSTADOS DERECHOS E IZQUIERDO Y FRONTAL INTERNOS Y EXTERNOS</td>
-            </tr>
-            <tr>
-                <td class="col-no">8.1</td>
-                <td class="field-label" style="width: 25%;">Adhesivo o pegante nuevo en uniones de laminas</td>
-                <td colspan="3">{{ $getValue('Adhesivo o pegante nuevo en uniones de laminas') }}</td>
-            </tr>
-            <tr>
-                <td class="col-no">8.2</td>
-                <td class="field-label" style="width: 25%;">Marcas o quemaduras recientes de soldadura</td>
-                <td colspan="3">{{ $getValue('Marcas o quemaduras recientes de soldadura') }}</td>
-            </tr>
-            <tr>
-                <td class="col-no">8.3</td>
-                <td class="field-label" style="width: 25%;">Existen dos o mas colores de pintura</td>
-                <td colspan="3">{{ $getValue('Existen dos o mas colores') }}</td>
-            </tr>
-            <tr>
-                <td class="col-no">8.4</td>
-                <td class="field-label" style="width: 25%;">Ondulaciones laterales con sonido metalicos disparejos *
-                </td>
-                <td colspan="3">{{ $getValue('Ondulaciones laterales') }}</td>
-            </tr>
-            <tr>
-                <td class="col-no">8.5</td>
-                <td class="field-label" style="width: 25%;">La altura entre piso, costados y techo se encuentran fuera
-                    de estandares *</td>
-                <td colspan="3">{{ $getValue('La altura entre piso') }}</td>
-            </tr>
-        </tbody>
-    </table>
-
-    <table>
-        <tr>
-            <td style="width: 50%;"><strong>Transportadora:</strong> {{ $getValue('Transportadora') }}</td>
-            <td style="width: 50%;"><strong>Cliente:</strong> {{ $getValue('Cliente') }}</td>
-        </tr>
-        <tr>
-            <td colspan="2"><strong>Número de los precintos de salida:</strong>
-                {{ $getValue('Numero de los precintos de salida') }}</td>
-        </tr>
-    </table>
-
-    <!-- Tabla Firmas Personal -->
-    <table>
-        <thead>
-            <tr class="section-header">
-                <th colspan="4">Personal que participan en el cargue:</th>
-            </tr>
-            <tr style="text-align: center; background-color: #f2f2f2;">
-                <th style="width: 40%;">NOMBRE COMPLETO</th>
-                <th style="width: 25%;">CARGO</th>
-                <th style="width: 20%;">FIRMA</th>
-                <th style="width: 15%;"># CHALECO</th>
-            </tr>
-        </thead>
-        <tbody>
-            @php $signatures = $getPersonalSignatures(); @endphp
-            @if($signatures->count() > 0)
-                @foreach($signatures as $sig)
-                    <tr>
-                        <td style="text-align: center;">{{ $sig->user->name }}</td>
-                        <td style="text-align: center;">{{ $sig->role_in_inspection }}</td>
-                        <td style="text-align: center;">
-                            @if($sig->signature)
-                                <img src="{{ $sig->signature }}" style="max-height: 40px;">
-                            @else
-                                Pendiente
-                            @endif
-                        </td>
-                        <td style="text-align: center;">{{ $sig->vest_number }}</td>
-                    </tr>
-                @endforeach
-            @else
-                <tr>
-                    <td colspan="4" style="text-align: center;">No hay personal registrado</td>
-                </tr>
-            @endif
-        </tbody>
-    </table>
-
-    <!-- Firmas Finales -->
-    <table>
-        <tbody>
-            <tr>
-                <td colspan="2" class="field-label" style="background-color: #fff; border-bottom: none;">
-                    <strong>Inspeccionado por:</strong>
-                </td>
-            </tr>
-            <tr>
-                <td style="width: 50%; text-align: center; border-top: none; padding: 20px;">
-                    <div style="height: 50px; width: 80%; margin: 0 auto;">
-                        @if($response->signature)
-                            <img src="{{ $response->signature }}" style="max-height: 50px;">
-                        @endif
-                    </div>
-                    <div style="border-top: 1px solid #000; width: 80%; margin: 0 auto;"></div>
-
-                    <div style="font-size: 10px; margin-top: 5px;">Responsable del despacho ( Firma )</div>
-
-
-                    <div style="margin: 15px auto 0 auto; width: 80%; font-weight: bold;">
-                        {{ $response->user->cedula ?? $response->user->id }}
-                    </div>
-                    <div style="border-top: 1px solid #000; width: 80%; margin: 0 auto;"></div>
-                    <div style="font-size: 10px; margin-top: 5px;">Número de Cédula</div>
-                </td>
-
-                <td style="width: 50%; text-align: center; border-top: none; padding: 20px;">
-                    <!-- Firma Control Riesgo (Inspector) -->
-                    <div style="height: 50px; width: 80%; margin: 0 auto;">
-                        @if($response->signature)
-                            <img src="{{ $response->signature }}" style="max-height: 50px;">
-                        @endif
-                    </div>
-                    <div style="border-top: 1px solid #000; width: 80%; margin: 0 auto;"></div>
-                    <div style="font-size: 10px; margin-top: 5px;">Verificación documental Control Riesgos (Firma)</div>
-
-                    <div style="margin: 15px auto 0 auto; width: 80%; font-weight: bold;">
-                        {{ $response->user->cedula ?? $response->user->id }}
-                    </div>
-                    <div style="border-top: 1px solid #000; width: 80%; margin: 0 auto;"></div>
-                    <div style="font-size: 10px; margin-top: 5px;">Número de Cédula</div>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-
+        </table>
+    </div>
 </body>
 
 </html>

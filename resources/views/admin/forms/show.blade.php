@@ -74,16 +74,6 @@
                 <h2>Configurar Versión: <span class="text-primary">{{ $version->version }}</span></h2>
             </div>
             <div class="d-flex gap-2">
-                <div class="dropdown">
-                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                        <i class="bi bi-list-ul"></i> Ir a Fase
-                    </button>
-                    <ul class="dropdown-menu dropdown-phase-list">
-                        @foreach($version->phases as $phase)
-                            <li><a class="dropdown-item" href="#phase-card-{{ $phase->id }}">{{ $phase->name }}</a></li>
-                        @endforeach
-                    </ul>
-                </div>
                 <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newPhaseModal">
                     <i class="bi bi-plus-lg"></i> Añadir Fase
                 </button>

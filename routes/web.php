@@ -102,3 +102,6 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+// Public route for inspection photos (Gallery)
+Route::get('/galeria/inspeccion/{response}', [App\Http\Controllers\ControlRiesgo\FormResponseController::class, 'gallery'])->name('reportes.gallery');
+

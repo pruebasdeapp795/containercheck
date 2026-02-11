@@ -233,4 +233,37 @@ class FormResponseController extends Controller
         $response->load(['formVersion.phases.fields', 'fieldResponses.field']);
         return view('control-riesgo.reportes.show', compact('response'));
     }
+
+    public function gallery(FormResponse $response)
+    {
+        if ($response->status !== 'completed' && $response->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $response->load(['formVersion.phases.fields', 'fieldResponses.field']);
+        $photos = [];
+
+        foreach ($response->fieldResponses as $fr) {
+            if ($fr->field->type === 'photo' && $fr->value) {
+                $decoded = json_decode($fr->value, true);
+                if (is_array($decoded)) {
+                    foreach ($decoded as $index => $path) {
+                        if ($path) {
+                            $photos[] = [
+                                'path' => $path,
+                                'label' => $fr->field->label . " (#" . ($index + 1) . ")"
+                            ];
+                        }
+                    }
+                } else {
+                    $photos[] = [
+                        'path' => $fr->value,
+                        'label' => $fr->field->label
+                    ];
+                }
+            }
+        }
+
+        return view('control-riesgo.reportes.gallery', compact('response', 'photos'));
+    }
 }
