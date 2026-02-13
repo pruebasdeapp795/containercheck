@@ -16,6 +16,15 @@ Route::get('/', function () {
         if ($role === 'admin') {
             return redirect()->route('admin.index');
         }
+        if ($role === 'monitoreo') {
+            return redirect()->route('monitoreo.index');
+        }
+        if ($role === 'visualizador') {
+            return redirect()->route('visualizador.index');
+        }
+        if ($role === 'despacho') {
+            return redirect()->route('despacho.index');
+        }
     }
     return view('portal.index');
 })->name('portal');
@@ -98,6 +107,32 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         Route::get('/', [App\Http\Controllers\Admin\ReportController::class, 'index'])->name('index');
         Route::get('/{response}', [App\Http\Controllers\Admin\ReportController::class, 'show'])->name('show');
     });
+});
+
+Route::middleware(['auth', 'role:monitoreo'])->prefix('monitoreo')->name('monitoreo.')->group(function () {
+    Route::get('/index', [\App\Http\Controllers\MonitoreoController::class, 'index'])->name('index');
+    Route::get('/inspeccion/{response}', [\App\Http\Controllers\MonitoreoController::class, 'show'])->name('show');
+    Route::post('/inspeccion/{response}/liberar', [\App\Http\Controllers\MonitoreoController::class, 'liberate'])->name('liberate');
+    Route::post('/firma/cargar', [\App\Http\Controllers\MonitoreoController::class, 'uploadSignature'])->name('uploadSignature');
+});
+
+Route::middleware(['auth', 'role:visualizador'])->prefix('visualizador')->name('visualizador.')->group(function () {
+    Route::get('/index', [\App\Http\Controllers\MonitoreoController::class, 'indexViewer'])->name('index');
+    Route::get('/inspeccion/{response}', [App\Http\Controllers\MonitoreoController::class, 'showViewer'])->name('show');
+    Route::get('/inventario', [App\Http\Controllers\MonitoreoController::class, 'inventario'])->name('inventario');
+    Route::post('/inventario', [App\Http\Controllers\MonitoreoController::class, 'storePrecinto'])->name('inventario.store');
+});
+
+Route::middleware(['auth', 'role:despacho'])->prefix('despacho')->name('despacho.')->group(function () {
+    Route::get('/index', [App\Http\Controllers\Despacho\DespachoController::class, 'index'])->name('index');
+    Route::get('/inspecciones/nueva/{version}', [App\Http\Controllers\Despacho\DespachoController::class, 'create'])->name('inspecciones.create');
+    Route::get('/inspecciones/{response}/continuar', [App\Http\Controllers\Despacho\DespachoController::class, 'edit'])->name('inspecciones.edit');
+    Route::post('/inspecciones/{response}/fase', [App\Http\Controllers\Despacho\DespachoController::class, 'savePhase'])->name('inspecciones.savePhase');
+    Route::post('/inspecciones/{response}/finalizar', [App\Http\Controllers\Despacho\DespachoController::class, 'store'])->name('store');
+
+    // Inventory routes
+    Route::get('/inventario', [App\Http\Controllers\Despacho\DespachoController::class, 'inventario'])->name('inventario');
+    Route::post('/inventario', [App\Http\Controllers\Despacho\DespachoController::class, 'storePrecinto'])->name('inventario.store');
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

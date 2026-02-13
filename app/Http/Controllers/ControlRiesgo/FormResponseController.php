@@ -26,9 +26,12 @@ class FormResponseController extends Controller
     public function dashboard()
     {
         $user = Auth::user();
-        $totalInspections = FormResponse::where('user_id', $user->id)->where('status', 'completed')->count();
+        $totalInspections = FormResponse::where('user_id', $user->id)
+            ->whereIn('status', ['completed', 'pending_monitoreo'])
+            ->count();
+
         $recentInspections = FormResponse::where('user_id', $user->id)
-            ->where('status', 'completed')
+            ->whereIn('status', ['completed', 'pending_monitoreo'])
             ->with('formVersion')
             ->latest()
             ->take(5)
@@ -200,7 +203,7 @@ class FormResponseController extends Controller
         $response->update([
             'signature' => $request->signature,
             'signed_at' => now(),
-            'status' => 'completed'
+            'status' => 'pending_monitoreo'
         ]);
 
         // Automatically calculate and save "Hora de Terminación Inspección" if the field exists
@@ -216,14 +219,14 @@ class FormResponseController extends Controller
             );
         }
 
-        return redirect()->route('control-riesgo.reportes')->with('success', 'Inspección realizada con éxito.');
+        return redirect()->route('control-riesgo.reportes')->with('success', 'Inspección firmada. Pendiente aprobación de Monitoreo.');
     }
 
     public function history()
     {
         $user = Auth::user();
         $responses = FormResponse::where('user_id', $user->id)
-            ->where('status', 'completed')
+            ->whereIn('status', ['completed', 'pending_monitoreo'])
             ->with('formVersion')
             ->orderBy('created_at', 'desc')
             ->get();
@@ -253,13 +256,17 @@ class FormResponseController extends Controller
             abort(403);
         }
 
+        if ($response->status === 'draft') {
+            return redirect()->route('control-riesgo.inspecciones.edit', $response->id);
+        }
+
         $response->load(['formVersion.phases.fields', 'fieldResponses.field']);
         return view('control-riesgo.reportes.show', compact('response'));
     }
 
     public function gallery(FormResponse $response)
     {
-        if ($response->status !== 'completed' && $response->user_id !== Auth::id()) {
+        if (!in_array($response->status, ['completed', 'pending_monitoreo']) && $response->user_id !== Auth::id()) {
             abort(403);
         }
 

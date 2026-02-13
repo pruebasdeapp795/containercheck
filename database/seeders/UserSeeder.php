@@ -47,6 +47,39 @@ class UserSeeder extends Seeder
             ]
         );
 
+        // Monitoreo
+        User::updateOrCreate(
+            ['usuario' => 'monitoreo'],
+            [
+                'name' => 'Monitoreo',
+                'email' => 'monitoreo@containercheck.com',
+                'password' => Hash::make('12345678'),
+                'role' => 'monitoreo',
+            ]
+        );
+
+        // Visualizador
+        User::updateOrCreate(
+            ['usuario' => 'visualizador'],
+            [
+                'name' => 'Visualizador',
+                'email' => 'visualizador@containercheck.com',
+                'password' => Hash::make('12345678'),
+                'role' => 'visualizador',
+            ]
+        );
+
+        // Despacho
+        User::updateOrCreate(
+            ['usuario' => 'despacho'],
+            [
+                'name' => 'Despacho',
+                'email' => 'despacho@containercheck.com',
+                'password' => Hash::make('12345678'),
+                'role' => 'despacho',
+            ]
+        );
+
         // Ensure all existing users have the generic password if needed
         // But usually seeders are for initial data.
         // If the user wants ALL users to have 12345678:

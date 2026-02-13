@@ -17,7 +17,8 @@
             <a class="navbar-brand text-white fw-bold" href="#">
                 <img src="{{ asset('imagenes/logo_blanco.png') }}" width="200px" alt="ContainerCheck">
             </a>
-            <button class="navbar-toggler border-white" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <button class="navbar-toggler border-white" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon" style="filter: invert(1);"></span>
             </button>
         </div>
@@ -36,7 +37,8 @@
             <div class="col-lg-4 offset-lg-1">
                 <div class="d-grid gap-3">
                     <a href="{{ route('login.admin') }}" class="access-card">Ingresar como Administrador</a>
-                    <a href="{{ route('login.control-riesgo') }}" class="access-card">Panel de Control Riesgo</a>
+                    <a href="{{ route('login.control-riesgo') }}" class="access-card">Panel de Control Riesgo
+                        (Despachos/Monitoreo)</a>
                     <a href="{{ route('login.personal') }}" class="access-card">Acceso Personal</a>
                 </div>
             </div>

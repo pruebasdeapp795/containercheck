@@ -83,8 +83,12 @@
                     <td>#{{ $response->id }}</td>
                 </tr>
                 <tr>
-                    <td class="label">Versión del Formulario:</td>
-                    <td>{{ $response->formVersion->version }}</td>
+                    <td class="label">Numero del contenedor:</td>
+                    <td>{{ $response->getContainerNumber() }}</td>
+                </tr>
+                <tr>
+                    <td class="label">Motivo de rechazo:</td>
+                    <td style="text-transform: uppercase;" >{{ $response->getRejectionReason() }}</td>
                 </tr>
                 <tr>
                     <td class="label">Inspector:</td>
@@ -95,12 +99,6 @@
                     <td>{{ $response->signed_at->format('d/m/Y H:i:s') }}</td>
                 </tr>
             </table>
-
-            <p>Por favor, ingrese al sistema administrativo para revisar los detalles del incumplimiento detectado.</p>
-
-            <div style="text-align: center;">
-                <a href="{{ url('/admin/reports/' . $response->id) }}" class="btn">Ver Detalle en el Sistema</a>
-            </div>
         </div>
         <div class="footer">
             Este es un correo automático generado por ContainerCheck. Por favor no responda a este mensaje.

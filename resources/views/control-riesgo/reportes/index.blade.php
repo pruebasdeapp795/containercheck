@@ -108,6 +108,8 @@
                                 <td>
                                     @if($response->status == 'completed')
                                         <span class="badge badge-success px-3 py-2 rounded-pill">Completado</span>
+                                    @elseif($response->status == 'pending_monitoreo')
+                                        <span class="badge bg-info px-3 py-2 rounded-pill text-dark">En Revisión</span>
                                     @elseif($response->status == 'rejected')
                                         <span class="badge bg-danger px-3 py-2 rounded-pill text-white">Rechazado</span>
                                     @else

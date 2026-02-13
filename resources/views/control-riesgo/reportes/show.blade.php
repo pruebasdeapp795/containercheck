@@ -243,6 +243,26 @@
         <button class="btn-print" onclick="window.print()">Descargar Reporte PDF</button>
     </div>
 
+    @if($response->status === 'pending_monitoreo')
+        <style>
+            .watermark {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%) rotate(-45deg);
+                font-size: 80px;
+                color: rgba(255, 0, 0, 0.2);
+                z-index: 9999;
+                pointer-events: none;
+                font-weight: bold;
+                border: 5px solid rgba(255, 0, 0, 0.2);
+                padding: 20px;
+                text-transform: uppercase;
+            }
+        </style>
+        <div class="watermark">PENDIENTE LIBERACIÓN</div>
+    @endif
+
     @php 
         $startTimeField = $response->formVersion->phases->flatMap->fields->where('label', 'Inicio de Inspección:')->first();
         $endTimeField = $response->formVersion->phases->flatMap->fields->where('label', 'Hora de Terminación Inspección')->first();
@@ -435,14 +455,24 @@
                         <div style="height: 50px;"></div>
                     @endif
                     <div class="sig-line"></div>
-                    <div class="sig-name">{{ Auth::user()->name }}</div>
-                    <div class="sig-meta">Inspector / Responsable<br>CC: {{ Auth::user()->cedula }}</div>
+                    <div class="sig-name">Despachador</div>
+                    <div class="sig-meta">Responsable del despacho<br>CC: {{ $response->user->cedula ?? 'N/A' }}</div>
                 </td>
                 <td class="sig-block">
-                    <div style="height: 50px;"></div>
-                    <div class="sig-line"></div>
-                    <div class="sig-name">Verificación</div>
-                    <div class="sig-meta">Control Riesgos / Seguridad<br>Firma y Sello Autorizado</div>
+                    @if($response->monitoreo_signature)
+                        <img src="{{ $response->monitoreo_signature }}" class="sig-img">
+                        <div class="sig-line"></div>
+                        <div class="sig-name">Verificación Monitoreo</div>
+                        <div class="sig-meta">
+                            {{ $response->monitoreoUser->name ?? 'Autorizado' }}<br>
+                            Fecha: {{ $response->monitoreo_signed_at ? \Carbon\Carbon::parse($response->monitoreo_signed_at)->format('d/m/Y') : '' }}
+                        </div>
+                    @else
+                        <div style="height: 50px;"></div>
+                        <div class="sig-line"></div>
+                        <div class="sig-name">Verificación</div>
+                        <div class="sig-meta">Control Riesgos / Seguridad<br>Pendiente</div>
+                    @endif
                 </td>
             </tr>
         </table>
