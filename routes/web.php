@@ -113,6 +113,7 @@ Route::middleware(['auth', 'role:monitoreo'])->prefix('monitoreo')->name('monito
     Route::get('/index', [\App\Http\Controllers\MonitoreoController::class, 'index'])->name('index');
     Route::get('/inspeccion/{response}', [\App\Http\Controllers\MonitoreoController::class, 'show'])->name('show');
     Route::post('/inspeccion/{response}/liberar', [\App\Http\Controllers\MonitoreoController::class, 'liberate'])->name('liberate');
+    Route::post('/inspeccion/{response}/rechazar', [\App\Http\Controllers\MonitoreoController::class, 'reject'])->name('reject');
     Route::post('/firma/cargar', [\App\Http\Controllers\MonitoreoController::class, 'uploadSignature'])->name('uploadSignature');
 });
 

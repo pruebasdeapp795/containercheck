@@ -15,7 +15,8 @@ class FormResponse extends Model
         'signed_at',
         'monitoreo_signature',
         'monitoreo_signed_at',
-        'monitoreo_user_id'
+        'monitoreo_user_id',
+        'rejection_reason'
     ];
 
     protected $casts = [
@@ -59,6 +60,10 @@ class FormResponse extends Model
 
     public function getRejectionReason()
     {
+        if ($this->rejection_reason) {
+            return $this->rejection_reason;
+        }
+
         // Try to find a field that has a rejection value matching its response
         $rejectedResponse = $this->fieldResponses()
             ->whereHas('field', function ($query) {
@@ -71,7 +76,7 @@ class FormResponse extends Model
             ->first();
 
         if ($rejectedResponse) {
-            return $rejectedResponse->field->label . ' Respuesta:' . $rejectedResponse->value   ;
+            return $rejectedResponse->field->label . ' Respuesta:' . $rejectedResponse->value;
         }
 
         return 'No especificado';

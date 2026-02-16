@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Revisión Monitoreo - #{{ $response->id }}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
         :root {
             --primary-blue: #003366;
@@ -161,8 +162,9 @@
             </a>
             <h5 class="m-0 fw-bold">Revisión de Inspección #{{ $response->id }}</h5>
             <div>
-                <span class="badge {{ $response->status == 'completed' ? 'bg-success' : 'bg-warning text-dark' }}">
-                    {{ $response->status == 'completed' ? 'LIBERADA' : 'PENDIENTE FIRMA' }}
+                <span
+                    class="badge {{ $response->status == 'completed' ? 'bg-success' : ($response->status == 'rejected' ? 'bg-danger' : 'bg-warning text-dark') }}">
+                    {{ $response->status == 'completed' ? 'LIBERADA' : ($response->status == 'rejected' ? 'RECHAZADA' : 'PENDIENTE FIRMA') }}
                 </span>
             </div>
         </div>
@@ -310,18 +312,65 @@
                             style="max-height: 80px; border: 1px solid #ddd; padding: 5px; background: white;">
                     </div>
 
-                    <form action="{{ route('monitoreo.liberate', $response->id) }}" method="POST" id="approvalForm">
-                        @csrf
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-success btn-lg fw-bold">
-                                <i class="bi bi-check-circle me-2"></i>LIBERAR INSPECCIÓN
-                            </button>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <form action="{{ route('monitoreo.liberate', $response->id) }}" method="POST" id="approvalForm"
+                                onsubmit="return confirm('¿Está seguro de que desea liberar esta inspección?')">
+                                @csrf
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-success btn-lg fw-bold">
+                                        <i class="bi bi-check-circle me-2"></i>LIBERAR INSPECCIÓN
+                                    </button>
+                                </div>
+                            </form>
                         </div>
-                    </form>
+                        <div class="col-md-6">
+                            <div class="d-grid">
+                                <button type="button" class="btn btn-danger btn-lg fw-bold" data-bs-toggle="modal"
+                                    data-bs-target="#rejectModal">
+                                    <i class="bi bi-x-circle me-2"></i>RECHAZAR INSPECCIÓN
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 @endif
             </div>
         @endif
     </div>
+    {{-- Modal Rechazo --}}
+    <div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="{{ route('monitoreo.reject', $response->id) }}" method="POST">
+                    @csrf
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title" id="rejectModalLabel">Motivo de Rechazo</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="rejection_reason" class="form-label fw-bold">Describa el motivo del
+                                rechazo:</label>
+                            <textarea class="form-control" id="rejection_reason" name="rejection_reason" rows="4"
+                                required placeholder="Ej: Precinto no coincide con el registro..."></textarea>
+                        </div>
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            Al rechazar la inspección, se notificará automáticamente a los responsables vía correo
+                            electrónico.
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger px-4 fw-bold">CONFIRMAR RECHAZO</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

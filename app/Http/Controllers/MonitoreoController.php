@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\FormResponse;
 use App\Models\Precinto;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\InspectionRejected;
 
 class MonitoreoController extends Controller
 {
@@ -62,6 +64,33 @@ class MonitoreoController extends Controller
         ]);
 
         return redirect()->route('monitoreo.index')->with('success', 'Inspección liberada correctamente.');
+    }
+
+    public function reject(Request $request, FormResponse $response)
+    {
+        if ($response->status !== 'pending_monitoreo') {
+            abort(403, 'Estado inválido para rechazo.');
+        }
+
+        $request->validate([
+            'rejection_reason' => 'required|string|max:1000',
+        ]);
+
+        $response->update([
+            'status' => 'rejected',
+            'rejection_reason' => $request->rejection_reason,
+            'monitoreo_user_id' => Auth::id(),
+            'monitoreo_signed_at' => now(), // Keep track of when it was rejected
+        ]);
+
+        // Trigger notification email
+        $emails = config('mail.rejection_emails');
+        if (!empty($emails)) {
+            $recipientList = array_map('trim', explode(',', $emails));
+            Mail::to($recipientList)->send(new InspectionRejected($response));
+        }
+
+        return redirect()->route('monitoreo.index')->with('warning', 'Inspección rechazada correctamente.');
     }
 
     public function uploadSignature(Request $request)
