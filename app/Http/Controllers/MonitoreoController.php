@@ -142,7 +142,16 @@ class MonitoreoController extends Controller
 
     public function inventario()
     {
-        $precintos = Precinto::where('estado', '!=', 'usado')->orderBy('created_at', 'desc')->get();
+        $disponibles = Precinto::where('estado', 'disponible')->orderBy('created_at', 'desc')->get();
+        $enLogistica = Precinto::where('estado', 'en_logistica')->orderBy('created_at', 'desc')->get();
+        $usados = Precinto::where('estado', 'usado')->orderBy('usado_at', 'desc')->take(100)->get();
+
+        // New Statistics
+        $totalIngresados = Precinto::count();
+        $usoMensual = Precinto::where('estado', 'usado')
+            ->whereMonth('usado_at', now()->month)
+            ->whereYear('usado_at', now()->year)
+            ->count();
 
         // Group by type and state 'disponible' to show what can be transferred
         $disponiblesPorTipo = Precinto::where('estado', 'disponible')
@@ -150,7 +159,14 @@ class MonitoreoController extends Controller
             ->groupBy('tipo')
             ->get();
 
-        return view('visualizador.inventario', compact('precintos', 'disponiblesPorTipo'));
+        return view('visualizador.inventario', compact(
+            'disponibles',
+            'enLogistica',
+            'usados',
+            'disponiblesPorTipo',
+            'totalIngresados',
+            'usoMensual'
+        ));
     }
 
     public function storePrecinto(Request $request)
@@ -194,16 +210,23 @@ class MonitoreoController extends Controller
         $request->validate([
             'tipo' => 'required|string',
             'cantidad' => 'required|integer|min:1',
+            'codigo' => 'nullable|string'
         ]);
 
-        // Find available seals of that type
-        $disponibles = Precinto::where('tipo', $request->tipo)
-            ->where('estado', 'disponible')
-            ->take($request->cantidad)
-            ->get();
+        if ($request->codigo) {
+            $disponibles = Precinto::where('codigo', $request->codigo)
+                ->where('estado', 'disponible')
+                ->get();
+        } else {
+            // Find available seals of that type
+            $disponibles = Precinto::where('tipo', $request->tipo)
+                ->where('estado', 'disponible')
+                ->take($request->cantidad)
+                ->get();
+        }
 
         if ($disponibles->count() < $request->cantidad) {
-            return redirect()->back()->with('error', "No hay suficientes precintos de tipo {$request->tipo} disponibles. Disponibles: " . $disponibles->count());
+            return redirect()->back()->with('error', "No hay suficientes precintos disponibles. Requeridos: {$request->cantidad}, Disponibles: " . $disponibles->count());
         }
 
         // Crear registro en Logistica (Acta de Traslado)

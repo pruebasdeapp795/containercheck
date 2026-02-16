@@ -109,9 +109,16 @@ class DespachoController extends FormResponseController
     // Inventory Methods (Updated to show what's in Logistica)
     public function inventario()
     {
-        // Only show seals that have been transferred to logistics
-        $precintos = Precinto::where('estado', 'en_logistica')
+        // Only show seals that have been transferred to logistics and are pending use
+        $enLogistica = Precinto::where('estado', 'en_logistica')
             ->orderBy('updated_at', 'desc')
+            ->get();
+
+        // Show seals used by this module
+        $usados = Precinto::where('estado', 'usado')
+            ->whereNotNull('form_response_id')
+            ->orderBy('usado_at', 'desc')
+            ->take(50)
             ->get();
 
         // Also get the history of transfers (Logistica table)
@@ -119,7 +126,7 @@ class DespachoController extends FormResponseController
             ->orderBy('fecha_traslado', 'desc')
             ->get();
 
-        return view('despacho.inventario.index', compact('precintos', 'transferencias'));
+        return view('despacho.inventario.index', compact('enLogistica', 'transferencias', 'usados'));
     }
 
     public function history()

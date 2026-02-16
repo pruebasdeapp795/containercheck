@@ -26,9 +26,32 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         }
 
-        .nav-link.active {
+        .nav-tabs .nav-link {
+            transition: all 0.2s ease;
+            color: #718096;
+            border: none;
+            border-bottom: 3px solid transparent;
+        }
+
+        .nav-tabs .nav-link:hover {
+            color: #0d6efd;
+            border-bottom: 3px solid #e2e8f0;
+        }
+
+        .nav-tabs .nav-link.active {
             color: #0d6efd !important;
             font-weight: 700;
+            border-bottom: 3px solid #0d6efd !important;
+            background: rgba(13, 110, 253, 0.05) !important;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: rgba(13, 110, 253, 0.02);
+        }
+
+        .badge {
+            font-weight: 600;
+            padding: 0.5em 0.8em;
         }
     </style>
 </head>
@@ -74,19 +97,70 @@
             </div>
         @endif
 
-        <div class="row mb-5">
-            <div class="col-12">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0"><i class="bi bi-truck me-2"></i>Historial de Traslados Recibidos</h5>
-                        <span class="badge bg-secondary">{{ $transferencias->count() }} traslados</span>
-                    </div>
-                    <div class="card-body p-0">
+        <div class="card shadow-sm overflow-hidden">
+            <div class="card-header bg-white p-0 border-bottom">
+                <ul class="nav nav-tabs border-0" id="despachoTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active px-4 py-3 fw-bold border-0 rounded-0" id="disponibles-tab"
+                            data-bs-toggle="tab" data-bs-target="#disponibles" type="button" role="tab">
+                            <i class="bi bi-check-circle me-2"></i>Disponibles ({{ $enLogistica->count() }})
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link px-4 py-3 fw-bold border-0 rounded-0" id="historial-tab"
+                            data-bs-toggle="tab" data-bs-target="#historial" type="button" role="tab">
+                            <i class="bi bi-clock-history me-2"></i>Traslados Recibidos
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link px-4 py-3 fw-bold border-0 rounded-0" id="usados-tab"
+                            data-bs-toggle="tab" data-bs-target="#usados" type="button" role="tab">
+                            <i class="bi bi-archive me-2"></i>Historial de Uso ({{ $usados->count() }})
+                        </button>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-body p-0">
+                <div class="tab-content" id="despachoTabsContent">
+                    {{-- Disponibles --}}
+                    <div class="tab-pane fade show active" id="disponibles" role="tabpanel">
                         <div class="table-responsive">
                             <table class="table table-hover align-middle mb-0">
                                 <thead class="table-light">
                                     <tr>
-                                        <th class="ps-4">Fecha Traslado</th>
+                                        <th class="ps-4">Código</th>
+                                        <th>Tipo</th>
+                                        <th>Fecha Recibido</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($enLogistica as $precinto)
+                                        <tr>
+                                            <td class="ps-4 fw-bold text-primary">{{ $precinto->codigo }}</td>
+                                            <td><span class="badge bg-secondary">{{ $precinto->tipo }}</span></td>
+                                            <td>{{ $precinto->updated_at->format('d/m/Y H:i') }}</td>
+                                            <td><span class="badge bg-warning text-dark small"><i
+                                                        class="bi bi-geo-alt me-1"></i>En Logística</span></td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="4" class="text-center py-5 text-muted">No hay precintos disponibles
+                                                en este momento.</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    {{-- Historial de Traslados --}}
+                    <div class="tab-pane fade" id="historial" role="tabpanel">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-4">Fecha</th>
                                         <th>Tipo</th>
                                         <th>Cantidad</th>
                                         <th>Enviado por</th>
@@ -102,7 +176,7 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="4" class="text-center text-muted py-4">No se han recibido traslados
+                                            <td colspan="4" class="text-center py-4 text-muted">No se han recibido traslados
                                                 aún.</td>
                                         </tr>
                                     @endforelse
@@ -110,46 +184,39 @@
                             </table>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
 
-        <div class="row">
-            <div class="col-12">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-light">
-                        <h5 class="mb-0"><i class="bi bi-box-seam me-2"></i>Precintos Disponibles para Inspecciones</h5>
-                    </div>
-                    <div class="card-body">
+                    {{-- Historial de Uso --}}
+                    <div class="tab-pane fade" id="usados" role="tabpanel">
                         <div class="table-responsive">
-                            <table class="table table-hover align-middle">
+                            <table class="table table-hover align-middle mb-0">
                                 <thead class="table-light">
                                     <tr>
-                                        <th>ID</th>
-                                        <th>Código</th>
+                                        <th class="ps-4">Código</th>
                                         <th>Tipo</th>
-                                        <th>Fecha Ingreso</th>
-                                        <th>Estado</th>
+                                        <th>Fecha Uso</th>
+                                        <th>Contenedor</th>
+                                        <th>Inspección</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @forelse($precintos as $precinto)
+                                    @forelse($usados as $precinto)
                                         <tr>
-                                            <td class="fw-semibold">#{{ $precinto->id }}</td>
-                                            <td>{{ $precinto->codigo }}</td>
-                                            <td>
-                                                <span class="badge bg-secondary">{{ $precinto->tipo }}</span>
+                                            <td class="ps-4 fw-bold text-muted">{{ $precinto->codigo }}</td>
+                                            <td><span
+                                                    class="badge bg-dark bg-opacity-10 text-dark">{{ $precinto->tipo }}</span>
                                             </td>
-                                            <td>{{ $precinto->fecha_ingreso->format('d/m/Y') }}</td>
-                                            <td>
-                                                <span class="badge bg-warning text-dark">En Logística</span>
+                                            <td>{{ $precinto->usado_at ? $precinto->usado_at->format('d/m/Y H:i') : '-' }}
                                             </td>
+                                            <td><span
+                                                    class="text-danger fw-bold fs-5">{{ $precinto->numero_contenedor ?? '-' }}</span>
+                                            </td>
+                                            <td><a href="{{ route('despacho.show', $precinto->form_response_id) }}"
+                                                    class="btn btn-sm btn-link">#{{ $precinto->form_response_id }}</a></td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="5" class="text-center text-muted py-5">
-                                                No hay precintos disponibles en este momento.
-                                            </td>
+                                            <td colspan="5" class="text-center py-5 text-muted">No hay registros de uso
+                                                recientes.</td>
                                         </tr>
                                     @endforelse
                                 </tbody>

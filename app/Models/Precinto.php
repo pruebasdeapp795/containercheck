@@ -20,6 +20,7 @@ class Precinto extends Model
 
     protected $casts = [
         'fecha_ingreso' => 'datetime',
+        'usado_at' => 'datetime',
     ];
 
     public function logistica()
