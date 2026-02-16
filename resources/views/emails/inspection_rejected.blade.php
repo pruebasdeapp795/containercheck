@@ -66,6 +66,17 @@
             border-radius: 5px;
             margin-top: 20px;
         }
+
+        .rejection-box {
+            background-color: #fff5f5;
+            border-left: 4px solid #e53e3e;
+            padding: 15px;
+            margin-top: 10px;
+            color: #c53030;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 14px;
+        }
     </style>
 </head>
 
@@ -88,7 +99,11 @@
                 </tr>
                 <tr>
                     <td class="label">Motivo de rechazo:</td>
-                    <td style="text-transform: uppercase;" >{{ $response->getRejectionReason() }}</td>
+                    <td>
+                        <div class="rejection-box">
+                            {{ $response->getRejectionReason() }}
+                        </div>
+                    </td>
                 </tr>
                 <tr>
                     <td class="label">Inspector:</td>

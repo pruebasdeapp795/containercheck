@@ -23,7 +23,7 @@
         }
 
         .report-custom-container {
-            max-width: 210mm;
+            max-width: 307mm;
             margin: 20px auto;
             background: white;
             padding: 10mm;
@@ -75,7 +75,7 @@
             width: 50%;
             border-bottom: 1px solid var(--border-color);
             border-right: 1px solid var(--border-color);
-            font-size: 10px;
+            font-size: 16px;
         }
 
         .data-item.full-width {
@@ -84,7 +84,7 @@
         }
 
         .data-label {
-            width: 140px;
+            width: 300px;
             font-weight: bold;
             background: var(--label-bg);
             padding: 5px 8px;
@@ -105,7 +105,7 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 5px;
-            font-size: 10px;
+            font-size: 16px;
             border: 1px solid var(--border-color);
         }
 
@@ -175,7 +175,7 @@
         <table class="header-table">
             <tr>
                 <td style="width: 25%;">
-                    <img src="{{ asset('imagenes/containerchecklogov.png') }}" width="120px" alt="ContainerCheck">
+                    <img src="{{ asset('imagenes/tubosalogo.png') }}" width="200px" alt="ContainerCheck">
                 </td>
                 <td class="header-title">
                     Reporte de Inspección<br>

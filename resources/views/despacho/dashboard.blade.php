@@ -52,6 +52,8 @@
                     <li class="nav-item"><a class="nav-link active" href="{{ route('despacho.index') }}">Inicio</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ route('despacho.index') }}">Inspecciones</a>
                     </li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('despacho.reportes') }}">Reportes</a>
+                    </li>
                     <li class="nav-item"><a class="nav-link" href="{{ route('despacho.inventario') }}">Inventario</a>
                     </li>
                     <li class="nav-item">
@@ -144,6 +146,8 @@
                 <div class="card p-4 h-100 shadow-sm border-0">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h5 class="fw-bold m-0">Últimas Inspecciones</h5>
+                        <a href="{{ route('despacho.reportes') }}"
+                            class="btn btn-sm btn-link text-decoration-none p-0">Ver historial</a>
                     </div>
                     <div class="table-responsive">
                         <table class="table table-hover align-middle">
@@ -152,6 +156,7 @@
                                     <th>Versión</th>
                                     <th>Fecha</th>
                                     <th>Estado</th>
+                                    <th>Acción</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -165,6 +170,10 @@
                                             @elseif($ri->status === 'pending_monitoreo')
                                                 <span class="badge bg-warning">Pendiente Monitoreo</span>
                                             @endif
+                                        </td>
+                                        <td>
+                                            <a href="{{ route('despacho.show', $ri->id) }}"
+                                                class="btn btn-sm btn-outline-primary">Ver Reporte</a>
                                         </td>
                                     </tr>
                                 @empty

@@ -71,7 +71,7 @@ class FormResponse extends Model
             ->first();
 
         if ($rejectedResponse) {
-            return $rejectedResponse->field->label  ;
+            return $rejectedResponse->field->label . ' Respuesta:' . $rejectedResponse->value   ;
         }
 
         return 'No especificado';

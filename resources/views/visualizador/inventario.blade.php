@@ -29,24 +29,30 @@
                     </div>
                     <div class="mt-3">
                         <p class="text-muted-custom mb-0">Total Unidades</p>
-                        <div class="stat-value">{{ $precintos->sum('cantidad') }} <small
-                                class="fs-6 fw-normal">unidades</small></div>
+                        <div class="stat-value">{{ $precintos->count() }} <small class="fs-6 fw-normal">unidades</small>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="col-md-3">
-                <div class="card card-custom p-3">
-                    <div class="d-flex justify-content-between">
-                        <i class="bi bi-exclamation-triangle text-danger fs-4"></i>
-                        <span class="badge badge-critical">Critico</span>
-                    </div>
-                    <div class="mt-3">
-                        <p class="text-muted-custom mb-0">Alerta de Stock</p>
-                        <div class="stat-value">0</div>
+            @foreach($disponiblesPorTipo as $disponible)
+                <div class="col-md-3">
+                    <div class="card card-custom p-3 border-start border-4 border-warning">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="mt-1">
+                                <p class="text-muted-custom mb-0 small text-uppercase fw-bold">{{ $disponible->tipo }}</p>
+                                <div class="stat-value">{{ $disponible->total }} <small
+                                        class="fs-6 fw-normal text-muted">disp.</small></div>
+                            </div>
+                            <button class="btn btn-warning btn-sm shadow-sm"
+                                onclick="openTransferModal('{{ $disponible->tipo }}', {{ $disponible->total }})"
+                                title="Trasladar a Logística">
+                                <i class="bi bi-truck"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
+            @endforeach
         </div>
 
         <div class="card card-custom p-4">
@@ -61,10 +67,9 @@
                             <th class="text-muted-custom small text-uppercase">ID</th>
                             <th class="text-muted-custom small text-uppercase">Código</th>
                             <th class="text-muted-custom small text-uppercase">Tipo</th>
-                            <th class="text-muted-custom small text-uppercase">Cantidad</th>
                             <th class="text-muted-custom small text-uppercase">Fecha Ingreso</th>
                             <th class="text-muted-custom small text-uppercase">Estado</th>
-                            <th class="text-muted-custom small text-uppercase">Acciones</th>
+                            <th class="text-muted-custom small text-uppercase">Logística ID</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -73,22 +78,29 @@
                                 <td class="fw-bold">{{ $precinto->id }}</td>
                                 <td class="fw-bold">{{ $precinto->codigo }}</td>
                                 <td class="text-muted-custom fw-bold">{{ $precinto->tipo }}</td>
-                                <td class="fw-bold">{{ $precinto->cantidad }}</td>
                                 <td class="text-muted-custom fw-bold">{{ $precinto->fecha_ingreso->format('d/m/Y H:i') }}</td>
                                 <td>
-                                    <span class="badge bg-success bg-opacity-10 text-success">
-                                        {{ ucfirst($precinto->estado) }}
-                                    </span>
+                                    @if($precinto->estado === 'disponible')
+                                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">
+                                            {{ ucfirst($precinto->estado) }}
+                                        </span>
+                                    @elseif($precinto->estado === 'en_logistica')
+                                        <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25">
+                                            En Logística
+                                        </span>
+                                    @else
+                                        <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25">
+                                            {{ ucfirst($precinto->estado) }}
+                                        </span>
+                                    @endif
                                 </td>
-                                <td>
-                                    <button class="btn btn-outline-warning btn-sm" title="Trasladar a Logística">
-                                        <i class="bi bi-truck"></i>
-                                    </button>
+                                <td class="text-muted-custom font-monospace">
+                                    {{ $precinto->logistica_id ? '#' . $precinto->logistica_id : '-' }}
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center text-muted py-5">
+                                <td colspan="6" class="text-center text-muted py-5">
                                     <div class="d-flex flex-column align-items-center">
                                         <i class="bi bi-inbox fs-1 mb-2"></i>
                                         <p>No hay precintos registrados</p>
@@ -116,34 +128,73 @@
                     @csrf
                     <div class="modal-body">
                         <div class="mb-3">
-                            <label for="codigo" class="form-label text-muted-custom">Código</label>
-                            <input type="text" class="form-control  border-secondary" id="codigo"
-                                name="codigo" required placeholder="Ej: PR-123456">
+                            <label for="codigos" class="form-label text-muted-custom">Códigos (uno por línea)</label>
+                            <textarea class="form-control border-secondary" id="codigos" name="codigos" rows="5" required
+                                placeholder="Ej:&#10;PR-001&#10;PR-002&#10;PR-003"></textarea>
+                            <small class="text-muted">Ingrese cada código en una línea diferente. Se crearán registros
+                                individuales para cada uno.</small>
                         </div>
                         <div class="mb-3">
-                            <label for="tipo" class="form-label text-muted-custom">Tipo</label>
+                            <label for="tipo" class="form-label text-muted-custom">Tipo de Precinto</label>
                             <select class="form-select  border-secondary" id="tipo" name="tipo" required>
                                 <option value="">Seleccione un tipo</option>
                                 <option value="Botella">Botella</option>
-                                <option value="Cable">Cable</option>
-                                <option value="Plastico">Plástico</option>
-                                <option value="Metálico">Metálico</option>
-                                <option value="Otro">Otro</option>
+                                <option value="Guaya">Guaya</option>
+                                <option value="Satelital">Satelital</option>
                             </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="cantidad" class="form-label text-muted-custom">Cantidad</label>
-                            <input type="number" class="form-control  border-secondary" id="cantidad"
-                                name="cantidad" min="1" required placeholder="1">
                         </div>
                     </div>
                     <div class="modal-footer border-top border-secondary">
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary">Guardar</button>
+                        <button type="submit" class="btn btn-primary">Guardar Precintos</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
+    <!-- Modal Traslado -->
+    <div class="modal fade" id="transferModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content card-custom">
+                <div class="modal-header border-bottom border-secondary">
+                    <h5 class="modal-title">Trasladar a Logística</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{{ route('visualizador.inventario.trasladar') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="tipo" id="transfer_tipo">
+                    <div class="modal-body">
+                        <div class="alert alert-info border-info border-opacity-25 bg-info bg-opacity-10 text-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            Va a trasladar precintos de tipo: <strong id="transfer_tipo_label"></strong>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted-custom">Cantidad a trasladar</label>
+                            <input type="number" name="cantidad" id="transfer_cantidad" class="form-control border-secondary" 
+                                   min="1" required>
+                            <div class="form-text text-muted-custom">Máximo disponible: <span id="transfer_max"></span></div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top border-secondary">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-warning">Confirmar Traslado</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openTransferModal(tipo, max) {
+            document.getElementById('transfer_tipo').value = tipo;
+            document.getElementById('transfer_tipo_label').innerText = tipo;
+            document.getElementById('transfer_cantidad').max = max;
+            document.getElementById('transfer_max').innerText = max;
+            document.getElementById('transfer_cantidad').value = 1;
+            
+            var modal = new bootstrap.Modal(document.getElementById('transferModal'));
+            modal.show();
+        }
+    </script>
 @endsection

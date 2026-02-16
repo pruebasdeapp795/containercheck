@@ -62,8 +62,8 @@
     <div class="container mt-5">
         <div class="row mb-4">
             <div class="col-12">
-                <h2 class="fw-bold">Inventario de Precintos</h2>
-                <p class="text-muted">Gestión de precintos disponibles en despacho.</p>
+                <h2 class="fw-bold">Inventario en Logística</h2>
+                <p class="text-muted">Precintos recibidos y disponibles para despacho.</p>
             </div>
         </div>
 
@@ -74,43 +74,41 @@
             </div>
         @endif
 
-        <div class="row mb-4">
+        <div class="row mb-5">
             <div class="col-12">
-                <div class="card">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0"><i class="bi bi-plus-circle me-2"></i>Agregar Precinto</h5>
+                <div class="card shadow-sm">
+                    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-truck me-2"></i>Historial de Traslados Recibidos</h5>
+                        <span class="badge bg-secondary">{{ $transferencias->count() }} traslados</span>
                     </div>
-                    <div class="card-body">
-                        <form action="{{ route('despacho.inventario.store') }}" method="POST">
-                            @csrf
-                            <div class="row g-3">
-                                <div class="col-md-4">
-                                    <label class="form-label fw-semibold">Código</label>
-                                    <input type="text" name="codigo" class="form-control" required
-                                        placeholder="Ej: PRE-001">
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label fw-semibold">Tipo</label>
-                                    <select name="tipo" class="form-select" required>
-                                        <option value="">Seleccione...</option>
-                                        <option value="Metálico">Metálico</option>
-                                        <option value="Plástico">Plástico</option>
-                                        <option value="Cable">Cable</option>
-                                        <option value="Electrónico">Electrónico</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label fw-semibold">Cantidad</label>
-                                    <input type="number" name="cantidad" class="form-control" min="1" required
-                                        placeholder="0">
-                                </div>
-                            </div>
-                            <div class="mt-3">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="bi bi-save me-2"></i>Agregar Precinto
-                                </button>
-                            </div>
-                        </form>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-4">Fecha Traslado</th>
+                                        <th>Tipo</th>
+                                        <th>Cantidad</th>
+                                        <th>Enviado por</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($transferencias as $t)
+                                        <tr>
+                                            <td class="ps-4">{{ $t->fecha_traslado->format('d/m/Y H:i') }}</td>
+                                            <td><span class="badge bg-info text-dark">{{ $t->tipo }}</span></td>
+                                            <td class="fw-bold">{{ $t->cantidad }} unidades</td>
+                                            <td>{{ $t->user->name }}</td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="4" class="text-center text-muted py-4">No se han recibido traslados
+                                                aún.</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -118,9 +116,9 @@
 
         <div class="row">
             <div class="col-12">
-                <div class="card">
+                <div class="card shadow-sm">
                     <div class="card-header bg-light">
-                        <h5 class="mb-0"><i class="bi bi-list-ul me-2"></i>Lista de Precintos</h5>
+                        <h5 class="mb-0"><i class="bi bi-box-seam me-2"></i>Precintos Disponibles para Inspecciones</h5>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
@@ -130,7 +128,6 @@
                                         <th>ID</th>
                                         <th>Código</th>
                                         <th>Tipo</th>
-                                        <th>Cantidad</th>
                                         <th>Fecha Ingreso</th>
                                         <th>Estado</th>
                                     </tr>
@@ -143,22 +140,15 @@
                                             <td>
                                                 <span class="badge bg-secondary">{{ $precinto->tipo }}</span>
                                             </td>
-                                            <td>{{ $precinto->cantidad }}</td>
                                             <td>{{ $precinto->fecha_ingreso->format('d/m/Y') }}</td>
                                             <td>
-                                                @if($precinto->estado === 'disponible')
-                                                    <span class="badge bg-success">Disponible</span>
-                                                @elseif($precinto->estado === 'en_uso')
-                                                    <span class="badge bg-warning">En Uso</span>
-                                                @else
-                                                    <span class="badge bg-danger">Agotado</span>
-                                                @endif
+                                                <span class="badge bg-warning text-dark">En Logística</span>
                                             </td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="6" class="text-center text-muted py-4">
-                                                No hay precintos registrados.
+                                            <td colspan="5" class="text-center text-muted py-5">
+                                                No hay precintos disponibles en este momento.
                                             </td>
                                         </tr>
                                     @endforelse

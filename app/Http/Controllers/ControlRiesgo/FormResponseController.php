@@ -95,6 +95,45 @@ class FormResponseController extends Controller
                 ['form_response_id' => $response->id, 'field_id' => $fieldId],
                 ['value' => $dbValue]
             );
+
+            // Logic to consume seals (Precintos)
+            // Fields: 164 (Precinto 01), 165 (Precinto 02), 166 (Satelital)
+            if (in_array($fieldId, [164, 165, 166])) {
+                // If there was a previous seal for this field in this response, free it
+                $oldValue = FieldResponse::where('form_response_id', $response->id)
+                    ->where('field_id', $fieldId)
+                    ->first()?->value;
+
+                if ($oldValue && $oldValue !== $value) {
+                    \App\Models\Precinto::where('codigo', $oldValue)
+                        ->where('form_response_id', $response->id)
+                        ->update([
+                            'estado' => 'en_logistica',
+                            'form_response_id' => null,
+                            'usado_at' => null
+                        ]);
+                }
+
+                // Mark new seal as used
+                if (!empty($value)) {
+                    // Try to find container number
+                    $containerNumber = $request->fields[60] ?? $request->fields[69] ?? $request->fields[77] ?? null;
+
+                    if (!$containerNumber) {
+                        $containerNumber = FieldResponse::where('form_response_id', $response->id)
+                            ->whereIn('field_id', [60, 69, 77])
+                            ->first()?->value;
+                    }
+
+                    \App\Models\Precinto::where('codigo', $value)
+                        ->update([
+                            'estado' => 'usado',
+                            'form_response_id' => $response->id,
+                            'numero_contenedor' => $containerNumber,
+                            'usado_at' => now()
+                        ]);
+                }
+            }
         }
 
         // Special Logic: Personal Del Cargue (Phase ID 13 Check via Field 65 - Cédula)

@@ -121,6 +121,7 @@ Route::middleware(['auth', 'role:visualizador'])->prefix('visualizador')->name('
     Route::get('/inspeccion/{response}', [App\Http\Controllers\MonitoreoController::class, 'showViewer'])->name('show');
     Route::get('/inventario', [App\Http\Controllers\MonitoreoController::class, 'inventario'])->name('inventario');
     Route::post('/inventario', [App\Http\Controllers\MonitoreoController::class, 'storePrecinto'])->name('inventario.store');
+    Route::post('/inventario/trasladar', [\App\Http\Controllers\MonitoreoController::class, 'trasladarALogistica'])->name('inventario.trasladar');
 });
 
 Route::middleware(['auth', 'role:despacho'])->prefix('despacho')->name('despacho.')->group(function () {
@@ -133,9 +134,16 @@ Route::middleware(['auth', 'role:despacho'])->prefix('despacho')->name('despacho
     // Inventory routes
     Route::get('/inventario', [App\Http\Controllers\Despacho\DespachoController::class, 'inventario'])->name('inventario');
     Route::post('/inventario', [App\Http\Controllers\Despacho\DespachoController::class, 'storePrecinto'])->name('inventario.store');
+
+    // Report routes
+    Route::get('/reportes', [App\Http\Controllers\Despacho\DespachoController::class, 'history'])->name('reportes');
+    Route::get('/reportes/{response}', [App\Http\Controllers\Despacho\DespachoController::class, 'show'])->name('show');
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// API route for searching precintos
+Route::middleware('auth')->get('/api/search-precinto', [\App\Http\Controllers\MonitoreoController::class, 'searchPrecinto'])->name('api.searchPrecinto');
 
 // Public route for inspection photos (Gallery)
 Route::get('/galeria/inspeccion/{response}', [App\Http\Controllers\ControlRiesgo\FormResponseController::class, 'gallery'])->name('reportes.gallery');

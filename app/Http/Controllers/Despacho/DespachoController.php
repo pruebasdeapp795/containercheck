@@ -106,29 +106,44 @@ class DespachoController extends FormResponseController
         return redirect()->route('despacho.index')->with('success', 'Inspección firmada. Pendiente aprobación de Monitoreo.');
     }
 
-    // Inventory Methods (Copied from MonitoreoController but adapted for Despacho view)
+    // Inventory Methods (Updated to show what's in Logistica)
     public function inventario()
     {
-        $precintos = Precinto::orderBy('created_at', 'desc')->get();
-        return view('despacho.inventario.index', compact('precintos'));
+        // Only show seals that have been transferred to logistics
+        $precintos = Precinto::where('estado', 'en_logistica')
+            ->orderBy('updated_at', 'desc')
+            ->get();
+
+        // Also get the history of transfers (Logistica table)
+        $transferencias = \App\Models\Logistica::with('user')
+            ->orderBy('fecha_traslado', 'desc')
+            ->get();
+
+        return view('despacho.inventario.index', compact('precintos', 'transferencias'));
     }
 
-    public function storePrecinto(Request $request)
+    public function history()
     {
-        $request->validate([
-            'codigo' => 'required|string',
-            'tipo' => 'required|string',
-            'cantidad' => 'required|integer|min:1',
-        ]);
+        $user = Auth::user();
+        $responses = FormResponse::where('user_id', $user->id)
+            ->whereIn('status', ['completed', 'pending_monitoreo', 'rejected'])
+            ->with('formVersion')
+            ->orderBy('created_at', 'desc')
+            ->get();
+        return view('despacho.reportes.index', compact('responses'));
+    }
 
-        Precinto::create([
-            'codigo' => $request->codigo,
-            'tipo' => $request->tipo,
-            'cantidad' => $request->cantidad,
-            'fecha_ingreso' => now(),
-            'estado' => 'disponible',
-        ]);
+    public function show(FormResponse $response)
+    {
+        if ($response->user_id !== Auth::id()) {
+            abort(403);
+        }
 
-        return redirect()->back()->with('success', 'Precinto agregado correctamente.');
+        if ($response->status === 'draft') {
+            return redirect()->route('despacho.inspecciones.edit', $response->id);
+        }
+
+        $response->load(['formVersion.phases.fields', 'fieldResponses.field', 'monitoreoUser']);
+        return view('control-riesgo.reportes.show', compact('response'));
     }
 }

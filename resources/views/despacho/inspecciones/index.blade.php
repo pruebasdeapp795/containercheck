@@ -154,6 +154,21 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        .precinto-result-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.2s;
+        }
+
+        .precinto-result-item:hover {
+            background-color: #f8f1ff;
+        }
+
+        .precinto-result-item:last-child {
+            border-bottom: none;
+        }
     </style>
 </head>
 
@@ -306,9 +321,22 @@
                                         class="form-label fw-semibold small text-uppercase text-muted">{{ $field->label }}</label>
     
                                     @if($field->type == 'text')
-                                        <input type="text" name="fields[{{ $field->id }}]"
-                                            class="form-control {{ $isLocked ? 'disabled-field' : '' }}" value="{{ $fieldVal }}"
-                                            required>
+                                        @php
+                                            $isPrecinto01 = ($field->id == 164);
+                                            $isPrecinto02 = ($field->id == 165);
+                                            $isSatelital = ($field->id == 166);
+                                        @endphp
+                                        <div class="position-relative">
+                                            <input type="text" name="fields[{{ $field->id }}]"
+                                                @if($isPrecinto01) data-precinto-type="Botella" @elseif($isPrecinto02) data-precinto-type="Guaya" @elseif($isSatelital) data-precinto-type="Satelital" @endif
+                                                class="form-control {{ ($isPrecinto01 || $isPrecinto02 || $isSatelital) ? 'precinto-search' : '' }} {{ $isLocked ? 'disabled-field' : '' }}" 
+                                                value="{{ $fieldVal }}"
+                                                autocomplete="off"
+                                                required>
+                                            @if($isPrecinto01 || $isPrecinto02 || $isSatelital)
+                                                <div class="precinto-results shadow-sm d-none position-absolute w-100 bg-white border rounded" style="z-index: 1000; max-height: 200px; overflow-y: auto;"></div>
+                                            @endif
+                                        </div>
                                     @elseif($field->type == 'numeric')
                                         <input type="number" step="any" name="fields[{{ $field->id }}]"
                                             class="form-control {{ $isLocked ? 'disabled-field' : '' }}" value="{{ $fieldVal }}"
@@ -867,6 +895,55 @@
                 const cedula = row.querySelector('.cedula-input').value;
                 const summarySpan = row.querySelector('.personal-summary');
                 summarySpan.innerText = `${e.target.value} ${cedula ? '- CC: ' + cedula : ''}`;
+            }
+        });
+
+        // Precinto Type-ahead logic
+        document.addEventListener('input', async function(e) {
+            if (e.target.classList.contains('precinto-search')) {
+                const input = e.target;
+                const query = input.value;
+                const tipo = input.dataset.precintoType;
+                const resultsContainer = input.nextElementSibling;
+                
+                if (query.length < 2) {
+                    resultsContainer.classList.add('d-none');
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/api/search-precinto?q=${query}&tipo=${tipo}`);
+                    const data = await response.json();
+
+                    if (data.length > 0) {
+                        resultsContainer.innerHTML = '';
+                        data.forEach(item => {
+                            const div = document.createElement('div');
+                            div.className = 'precinto-result-item';
+                            div.innerText = item.codigo;
+                            div.onclick = function() {
+                                input.value = item.codigo;
+                                resultsContainer.classList.add('d-none');
+                                // Trigger change to ensure any other listeners (like rejection check) run
+                                input.dispatchEvent(new Event('change', { bubbles: true }));
+                            };
+                            resultsContainer.appendChild(div);
+                        });
+                        resultsContainer.classList.remove('d-none');
+                    } else {
+                        resultsContainer.innerHTML = '<div class="p-2 text-muted small">No se encontró disponible</div>';
+                        resultsContainer.classList.remove('d-none');
+                    }
+                } catch (error) {
+                    console.error('Error buscando precinto:', error);
+                }
+            }
+        });
+
+        // Close results when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.classList.contains('precinto-search')) {
+                document.querySelectorAll('.precinto-results').forEach(el => el.classList.add('d-none'));
             }
         });
     </script>

@@ -84,7 +84,7 @@
         }
 
         .photo-date {
-            font-size: 0.75rem;
+            font-size: 1.25rem;
             color: var(--text-muted);
             margin-top: 5px;
         }
@@ -112,7 +112,10 @@
                         onclick="window.open(this.src, '_blank')">
                     <div class="photo-info">
                         <div class="photo-label">{{ $photo['label'] }}</div>
-                        <div class="photo-date">Tomada durante la inspección técnica</div>
+                        @if ($photo['label'] == 'Foto de lado')
+                            <div class="photo-date"># Contenedor: {{ $response->getContainerNumber() }}</div>
+                        @endif
+                        
                     </div>
                 </div>
             @endforeach
