@@ -187,7 +187,8 @@
                 <td style="width: 25%;" class="header-info-box">
                     <strong>FECHA:</strong> {{ $response->created_at->format('d/m/Y') }}<br>
                     <strong>HORA:</strong> {{ $response->created_at->format('H:i') }}<br>
-                    <strong>DESPACHADOR:</strong> {{ $response->user->name }}
+                    <strong>DESPACHADOR:</strong> {{ $response->user->name }}<br>
+                    <strong>EXPORTACIÓN</strong> 
                 </td>
             </tr>
         </table>

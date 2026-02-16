@@ -23,7 +23,7 @@
         }
 
         .report-custom-container {
-            max-width: 210mm;
+            max-width: 307mm;
             margin: 20px auto;
             background: white;
             padding: 10mm;
@@ -75,7 +75,7 @@
             width: 50%;
             border-bottom: 1px solid var(--border-color);
             border-right: 1px solid var(--border-color);
-            font-size: 10px;
+            font-size: 16px;
         }
 
         .data-item.full-width {
@@ -84,7 +84,7 @@
         }
 
         .data-label {
-            width: 140px;
+            width: 300px;
             font-weight: bold;
             background: var(--label-bg);
             padding: 5px 8px;
@@ -105,7 +105,7 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 5px;
-            font-size: 10px;
+            font-size: 16px;
             border: 1px solid var(--border-color);
         }
 
@@ -161,7 +161,7 @@
         <table class="header-table">
             <tr>
                 <td style="width: 25%;">
-                    <img src="{{ asset('imagenes/containerchecklogov.png') }}" width="120px" alt="ContainerCheck">
+                    <img src="{{ asset('imagenes/tubosalogo.png') }}" width="200px" alt="ContainerCheck">
                 </td>
                 <td class="header-title">
                     Reporte de Inspección<br>
@@ -171,7 +171,8 @@
                 <td style="width: 25%;" class="header-info-box">
                     <strong>FECHA:</strong> {{ $response->created_at->format('d/m/Y') }}<br>
                     <strong>HORA:</strong> {{ $response->created_at->format('H:i') }}<br>
-                    <strong>DESPACHADOR:</strong> {{ $response->user->name }}
+                    <strong>DESPACHADOR:</strong> {{ $response->user->name }}<br>
+                    <strong>EXPORTACIÓN</strong> 
                 </td>
             </tr>
         </table>
@@ -255,15 +256,18 @@
                 @endif
                 <div style="border-top: 1px solid #000; width: 80%; margin: 0 auto;"></div>
                 <small class="fw-bold">DESPACHADOR</small><br>
-                <small class="text-muted">{{ $response->user->name }}</small>
+                <small class="text-muted">
+                    {{ $response->user->name ?? 'N/A' }}<br>
+                    CC: {{ $response->user->cedula ?? 'N/A' }}
+                </small>
             </div>
             <div class="col-6 text-center">
                 @if($response->monitoreo_signature)
                     <img src="{{ $response->monitoreo_signature }}" style="max-height: 60px; margin-bottom: 5px;"><br>
                     <div style="border-top: 1px solid #000; width: 80%; margin: 0 auto;"></div>
-                    <small class="fw-bold">MONITOREO (LIBERADO)</small><br>
-                    <small class="text-muted">{{ $response->monitoreoUser->name ?? 'Firma Autorizada' }}</small>
-                    <br><small class="text-muted">{{ $response->monitoreo_signed_at?->format('d/m/Y H:i') }}</small>
+                    <small class="fw-bold">MONITOREO</small><br>
+                    <small class="text-muted">{{ $response->monitoreoUser->name ?? 'Firma Autorizada' }}</small><br>
+                    <small class="text-muted">CC: {{ $response->monitoreoUser->cedula ?? 'N/A' }}</small>
                 @else
                     <div style="height: 65px;"></div>
                     <div style="border-top: 1px solid #ccc; width: 80%; margin: 0 auto;"></div>

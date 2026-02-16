@@ -287,8 +287,8 @@
                 <strong>CÓDIGO:</strong> FCR16<br>
                 <strong>REVISIÓN:</strong> 03<br>
                 <strong>FECHA:</strong> {{ \Carbon\Carbon::parse($response->created_at)->format('d/m/Y') }}<br>
-                <strong>H. INICIO:</strong> {{ $horaInicio }} | 
-                <strong>H. FINAL:</strong> {{ $horaFin }}
+                <strong>EXPORTACIÓN</strong> 
+                
             </td>
         </tr>
     </table>
