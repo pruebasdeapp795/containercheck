@@ -83,6 +83,10 @@ class MonitoreoController extends Controller
             'monitoreo_signed_at' => now(), // Keep track of when it was rejected
         ]);
 
+        // Marcar precintos asociados como 'anulado' (ya que si se rechaza, el precinto se pierde/rompe)
+        Precinto::where('form_response_id', $response->id)
+            ->update(['estado' => 'anulado']);
+
         // Trigger notification email
         $emails = config('mail.rejection_emails');
         if (!empty($emails)) {
@@ -145,12 +149,13 @@ class MonitoreoController extends Controller
         $disponibles = Precinto::where('estado', 'disponible')->orderBy('created_at', 'desc')->get();
         $enLogistica = Precinto::where('estado', 'en_logistica')->orderBy('created_at', 'desc')->get();
         $usados = Precinto::where('estado', 'usado')->orderBy('usado_at', 'desc')->take(100)->get();
+        $anulados = Precinto::where('estado', 'anulado')->orderBy('updated_at', 'desc')->take(100)->get();
 
         // New Statistics
         $totalIngresados = Precinto::count();
-        $usoMensual = Precinto::where('estado', 'usado')
-            ->whereMonth('usado_at', now()->month)
-            ->whereYear('usado_at', now()->year)
+        $usoMensual = Precinto::whereIn('estado', ['usado', 'anulado'])
+            ->whereMonth('updated_at', now()->month)
+            ->whereYear('updated_at', now()->year)
             ->count();
 
         // Group by type and state 'disponible' to show what can be transferred
@@ -163,6 +168,7 @@ class MonitoreoController extends Controller
             'disponibles',
             'enLogistica',
             'usados',
+            'anulados',
             'disponiblesPorTipo',
             'totalIngresados',
             'usoMensual'

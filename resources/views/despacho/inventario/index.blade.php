@@ -118,6 +118,12 @@
                             <i class="bi bi-archive me-2"></i>Historial de Uso ({{ $usados->count() }})
                         </button>
                     </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link px-4 py-3 fw-bold border-0 rounded-0" id="anulados-tab"
+                            data-bs-toggle="tab" data-bs-target="#anulados" type="button" role="tab">
+                            <i class="bi bi-x-octagon me-2"></i>Anulados ({{ $anulados->count() }})
+                        </button>
+                    </li>
                 </ul>
             </div>
             <div class="card-body p-0">
@@ -217,6 +223,54 @@
                                         <tr>
                                             <td colspan="5" class="text-center py-5 text-muted">No hay registros de uso
                                                 recientes.</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    {{-- Anulados --}}
+                    <div class="tab-pane fade" id="anulados" role="tabpanel">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-4">Código</th>
+                                        <th>Tipo</th>
+                                        <th>Fecha Anulación</th>
+                                        <th>Motivo (Rechazo)</th>
+                                        <th>Inspección</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($anulados as $precinto)
+                                        <tr>
+                                            <td class="ps-4 fw-bold text-danger">{{ $precinto->codigo }}</td>
+                                            <td><span
+                                                    class="badge bg-danger bg-opacity-10 text-danger text-dark">{{ $precinto->tipo }}</span>
+                                            </td>
+                                            <td>{{ $precinto->updated_at->format('d/m/Y H:i') }}</td>
+                                            <td class="small text-muted">
+                                                @if($precinto->formResponse)
+                                                    {{ Str::limit($precinto->formResponse->rejection_reason, 50) }}
+                                                @else
+                                                    -
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @if($precinto->form_response_id)
+                                                    <a href="{{ route('despacho.show', $precinto->form_response_id) }}"
+                                                        class="btn btn-sm btn-link text-danger">#{{ $precinto->form_response_id }}</a>
+                                                @else
+                                                    -
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="5" class="text-center py-5 text-muted">No hay registros de
+                                                precintos anulados.</td>
                                         </tr>
                                     @endforelse
                                 </tbody>

@@ -121,12 +121,18 @@ class DespachoController extends FormResponseController
             ->take(50)
             ->get();
 
+        // Show seals that were rejected (anulados)
+        $anulados = Precinto::where('estado', 'anulado')
+            ->orderBy('updated_at', 'desc')
+            ->take(50)
+            ->get();
+
         // Also get the history of transfers (Logistica table)
         $transferencias = \App\Models\Logistica::with('user')
             ->orderBy('fecha_traslado', 'desc')
             ->get();
 
-        return view('despacho.inventario.index', compact('enLogistica', 'transferencias', 'usados'));
+        return view('despacho.inventario.index', compact('enLogistica', 'transferencias', 'usados', 'anulados'));
     }
 
     public function history()
