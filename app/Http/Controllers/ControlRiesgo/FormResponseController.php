@@ -289,6 +289,20 @@ class FormResponseController extends Controller
         ]);
     }
 
+    public function searchUsers(Request $request)
+    {
+        $query = $request->get('q');
+        if (empty($query))
+            return response()->json([]);
+
+        $users = User::where('cedula', 'LIKE', "$query%")
+            ->orWhere('name', 'LIKE', "%$query%")
+            ->take(10)
+            ->get(['id', 'name', 'cedula']);
+
+        return response()->json($users);
+    }
+
     public function show(FormResponse $response)
     {
         if ($response->user_id !== Auth::id()) {

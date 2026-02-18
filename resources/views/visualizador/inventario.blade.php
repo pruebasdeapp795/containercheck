@@ -49,6 +49,18 @@
                 <h1 class="h3 mb-1">Inventario</h1>
                 <p class="text-muted-custom">Gestiona los precintos</p>
             </div>
+            <div class="flex-grow-1 mx-4 d-none d-md-block">
+                <form action="{{ route('control-riesgo.inventario') }}" method="GET">
+                    <div class="input-group" style="max-width: 500px;">
+                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
+                        <input type="text" name="q" class="form-control border-start-0" placeholder="Buscar precinto..." value="{{ $search }}">
+                        @if($search)
+                            <a href="{{ route('control-riesgo.inventario') }}" class="btn btn-outline-secondary"><i class="bi bi-x-lg"></i></a>
+                        @endif
+                        <button class="btn btn-primary" type="submit">Buscar</button>
+                    </div>
+                </form>
+            </div>
             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPrecintoModal">
                 <i class="bi bi-plus-circle"></i> Agregar Precinto
             </button>
@@ -64,7 +76,7 @@
                     </div>
                     <div class="mt-3">
                         <p class="text-muted-custom mb-0 small text-uppercase fw-bold">Disponibles</p>
-                        <div class="stat-value">{{ $disponibles->count() }}</div>
+                        <div class="stat-value">{{ $disponibles->total() }}</div>
                         <small class="text-muted">En oficina central</small>
                     </div>
                 </div>
@@ -79,7 +91,7 @@
                     </div>
                     <div class="mt-3">
                         <p class="text-muted-custom mb-0 small text-uppercase fw-bold">Traslados</p>
-                        <div class="stat-value">{{ $enLogistica->count() }}</div>
+                        <div class="stat-value">{{ $enLogistica->total() }}</div>
                         <small class="text-muted">En zona de cargue</small>
                     </div>
                 </div>
@@ -139,26 +151,32 @@
                 <ul class="nav nav-tabs border-0" id="inventoryTabs" role="tablist">
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active px-4 py-3 fw-bold border-0 rounded-0" id="disponibles-tab"
-                            data-bs-toggle="tab" data-bs-target="#disponibles" type="button" role="tab">
-                            <i class="bi bi-check-circle me-2"></i>Disponibles ({{ $disponibles->count() }})
+                            data-bs-toggle="tab" data-bs-target="#disponibles" type="button" role="tab" onclick="setTab('disponibles')">
+                            <i class="bi bi-check-circle me-2"></i>Disponibles ({{ $disponibles->total() }})
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
                         <button class="nav-link px-4 py-3 fw-bold border-0 rounded-0" id="logistica-tab" data-bs-toggle="tab"
-                            data-bs-target="#logistica" type="button" role="tab">
-                            <i class="bi bi-truck me-2"></i>En Logística ({{ $enLogistica->count() }})
+                            data-bs-target="#logistica" type="button" role="tab" onclick="setTab('logistica')">
+                            <i class="bi bi-truck me-2"></i>En Logística ({{ $enLogistica->total() }})
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
                         <button class="nav-link px-4 py-3 fw-bold border-0 rounded-0" id="usados-tab" data-bs-toggle="tab"
-                            data-bs-target="#usados" type="button" role="tab">
-                            <i class="bi bi-archive me-2"></i>Historial de Uso ({{ $usados->count() }})
+                            data-bs-target="#usados" type="button" role="tab" onclick="setTab('usados')">
+                            <i class="bi bi-archive me-2"></i>Historial de Uso ({{ $usados->total() }})
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
                         <button class="nav-link px-4 py-3 fw-bold border-0 rounded-0" id="anulados-tab" data-bs-toggle="tab"
-                            data-bs-target="#anulados" type="button" role="tab">
-                            <i class="bi bi-x-octagon me-2"></i>Anulados ({{ $anulados->count() }})
+                            data-bs-target="#anulados" type="button" role="tab" onclick="setTab('anulados')">
+                            <i class="bi bi-x-octagon me-2"></i>Anulados ({{ $anulados->total() }})
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link px-4 py-3 fw-bold border-0 rounded-0" id="todos-tab" data-bs-toggle="tab"
+                            data-bs-target="#todos" type="button" role="tab" onclick="setTab('todos')">
+                            <i class="bi bi-list-ul me-2"></i>Total Ingresos ({{ $todos->total() }})
                         </button>
                     </li>
                 </ul>
@@ -195,6 +213,9 @@
                                 </tbody>
                             </table>
                         </div>
+                        <div class="p-3 border-top">
+                            {{ $disponibles->appends(['q' => $search, 'tab' => 'disponibles'])->links() }}
+                        </div>
                     </div>
 
                     {{-- En Logística --}}
@@ -223,6 +244,9 @@
                                 </tbody>
                             </table>
                         </div>
+                        <div class="p-3 border-top">
+                            {{ $enLogistica->appends(['q' => $search, 'tab' => 'logistica'])->links() }}
+                        </div>
                     </div>
 
                     {{-- Usados --}}
@@ -245,13 +269,16 @@
                                             <td><span class="badge bg-dark bg-opacity-10 text-dark">{{ $precinto->tipo }}</span></td>
                                             <td>{{ $precinto->usado_at ? $precinto->usado_at->format('d/m/Y H:i') : '-' }}</td>
                                             <td><span class="text-danger fw-bold">{{ $precinto->numero_contenedor ?? '-' }}</span></td>
-                                            <td><a href="{{ route('visualizador.show', $precinto->form_response_id) }}" class="btn btn-sm btn-link">#{{ $precinto->form_response_id }}</a></td>
+                                            <td><a href="{{ route('control-riesgo.show', $precinto->form_response_id) }}" class="btn btn-sm btn-link">#{{ $precinto->form_response_id }}</a></td>
                                         </tr>
                                     @empty
                                         <tr><td colspan="5" class="text-center py-5 text-muted">No hay registros de uso recientes.</td></tr>
                                     @endforelse
                                 </tbody>
                             </table>
+                        </div>
+                        <div class="p-3 border-top">
+                            {{ $usados->appends(['q' => $search, 'tab' => 'usados'])->links() }}
                         </div>
                     </div>
 
@@ -283,7 +310,7 @@
                                             </td>
                                             <td>
                                                 @if($precinto->form_response_id)
-                                                    <a href="{{ route('visualizador.show', $precinto->form_response_id) }}" class="btn btn-sm btn-link text-danger">#{{ $precinto->form_response_id }}</a>
+                                                    <a href="{{ route('control-riesgo.show', $precinto->form_response_id) }}" class="btn btn-sm btn-link text-danger">#{{ $precinto->form_response_id }}</a>
                                                 @else
                                                     -
                                                 @endif
@@ -294,6 +321,75 @@
                                     @endforelse
                                 </tbody>
                             </table>
+                        </div>
+                        <div class="p-3 border-top">
+                            {{ $anulados->appends(['q' => $search, 'tab' => 'anulados'])->links() }}
+                        </div>
+                    </div>
+
+                    {{-- Todos los Ingresos --}}
+                    <div class="tab-pane fade" id="todos" role="tabpanel">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-4">Código</th>
+                                        <th>Tipo</th>
+                                        <th>Fecha Ingreso</th>
+                                        <th>Estado Actual</th>
+                                        <th>¿Consumido?</th>
+                                        <th>Detalles</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($todos as $precinto)
+                                        <tr>
+                                            <td class="ps-4 fw-bold">{{ $precinto->codigo }}</td>
+                                            <td><span class="badge bg-secondary bg-opacity-10 text-secondary">{{ $precinto->tipo }}</span></td>
+                                            <td>{{ $precinto->created_at->format('d/m/Y H:i') }}</td>
+                                            <td>
+                                                @switch($precinto->estado)
+                                                    @case('disponible')
+                                                        <span class="badge bg-success">Disponible</span>
+                                                        @break
+                                                    @case('en_logistica')
+                                                        <span class="badge bg-warning text-dark">En Logística</span>
+                                                        @break
+                                                    @case('usado')
+                                                        <span class="badge bg-primary">Consumido / Usado</span>
+                                                        @break
+                                                    @case('anulado')
+                                                        <span class="badge bg-danger">Anulado</span>
+                                                        @break
+                                                    @default
+                                                        <span class="badge bg-secondary">{{ $precinto->estado }}</span>
+                                                @endswitch
+                                            </td>
+                                            <td>
+                                                @if($precinto->estado == 'usado')
+                                                    <span class="text-success fw-bold"><i class="bi bi-check-circle-fill me-1"></i>SÍ</span>
+                                                @elseif($precinto->estado == 'anulado')
+                                                    <span class="text-danger fw-bold"><i class="bi bi-x-circle-fill me-1"></i>RECHAZADO</span>
+                                                @else
+                                                    <span class="text-muted"><i class="bi bi-circle me-1"></i>NO</span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @if($precinto->form_response_id)
+                                                    <a href="{{ route('control-riesgo.show', $precinto->form_response_id) }}" class="btn btn-sm btn-link">Ver Inspección</a>
+                                                @else
+                                                    -
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr><td colspan="6" class="text-center py-5 text-muted">No hay registros de precintos.</td></tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="p-3 border-top">
+                            {{ $todos->appends(['q' => $search, 'tab' => 'todos'])->links() }}
                         </div>
                     </div>
                 </div>
@@ -311,7 +407,7 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
-                <form action="{{ route('visualizador.inventario.store') }}" method="POST">
+                <form action="{{ route('control-riesgo.inventario.store') }}" method="POST">
                     @csrf
                     <div class="modal-body">
                         <div class="mb-3">
@@ -348,7 +444,7 @@
                     <h5 class="modal-title">Trasladar a Logística</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form action="{{ route('visualizador.inventario.trasladar') }}" method="POST">
+                <form action="{{ route('control-riesgo.inventario.trasladar') }}" method="POST">
                     @csrf
                     <input type="hidden" name="tipo" id="transfer_tipo">
                     <input type="hidden" name="codigo" id="transfer_specific_codigo">
@@ -387,9 +483,6 @@
             if (codigo) {
                 qtyInput.value = 1;
                 qtyInput.readOnly = true;
-                // Add hidden field for specific code if needed, but currently the controller expects quantity.
-                // If the user wants to transfer a SPECIFIC seal, the current controller might need an update.
-                // But for now, quantity=1 of that type is what's implemented.
             } else {
                 qtyInput.readOnly = false;
             }
@@ -397,5 +490,25 @@
             var modal = new bootstrap.Modal(document.getElementById('transferModal'));
             modal.show();
         }
+
+        // Set tab in URL to preserve state on refresh/pagination
+        function setTab(tabName) {
+            const url = new URL(window.location);
+            url.searchParams.set('tab', tabName);
+            window.history.replaceState({}, '', url);
+        }
+
+        // Activate tab from URL on load
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const activeTab = urlParams.get('tab');
+            if (activeTab) {
+                const tabEl = document.querySelector(`#${activeTab}-tab`);
+                if (tabEl) {
+                    const tab = new bootstrap.Tab(tabEl);
+                    tab.show();
+                }
+            }
+        });
     </script>
 @endsection

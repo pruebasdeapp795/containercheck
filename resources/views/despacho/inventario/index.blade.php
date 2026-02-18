@@ -83,10 +83,24 @@
     </nav>
 
     <div class="container mt-5">
-        <div class="row mb-4">
-            <div class="col-12">
-                <h2 class="fw-bold">Inventario en Logística</h2>
-                <p class="text-muted">Precintos recibidos y disponibles para despacho.</p>
+        <div class="row mb-4 align-items-center">
+            <div class="col-md-6 text-start">
+                <h2 class="fw-bold m-0">Inventario en Logística</h2>
+                <p class="text-muted m-0">Precintos recibidos y disponibles para despacho.</p>
+            </div>
+            <div class="col-md-6 mt-3 mt-md-0">
+                <form action="{{ route('despacho.inventario') }}" method="GET" class="d-flex">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
+                        <input type="text" name="q" class="form-control border-start-0"
+                            placeholder="Buscar por código de precinto..." value="{{ $search }}">
+                        <button class="btn btn-primary px-4" type="submit">Buscar</button>
+                    </div>
+                    @if($search)
+                        <a href="{{ route('despacho.inventario') }}" class="btn btn-outline-secondary ms-2"><i
+                                class="bi bi-x-lg"></i></a>
+                    @endif
+                </form>
             </div>
         </div>
 
@@ -102,26 +116,37 @@
                 <ul class="nav nav-tabs border-0" id="despachoTabs" role="tablist">
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active px-4 py-3 fw-bold border-0 rounded-0" id="disponibles-tab"
-                            data-bs-toggle="tab" data-bs-target="#disponibles" type="button" role="tab">
-                            <i class="bi bi-check-circle me-2"></i>Disponibles ({{ $enLogistica->count() }})
+                            data-bs-toggle="tab" data-bs-target="#disponibles" type="button" role="tab"
+                            onclick="setTab('disponibles')">
+                            <i class="bi bi-check-circle me-2"></i>Disponibles ({{ $enLogistica->total() }})
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
                         <button class="nav-link px-4 py-3 fw-bold border-0 rounded-0" id="historial-tab"
-                            data-bs-toggle="tab" data-bs-target="#historial" type="button" role="tab">
+                            data-bs-toggle="tab" data-bs-target="#historial" type="button" role="tab"
+                            onclick="setTab('historial')">
                             <i class="bi bi-clock-history me-2"></i>Traslados Recibidos
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
                         <button class="nav-link px-4 py-3 fw-bold border-0 rounded-0" id="usados-tab"
-                            data-bs-toggle="tab" data-bs-target="#usados" type="button" role="tab">
-                            <i class="bi bi-archive me-2"></i>Historial de Uso ({{ $usados->count() }})
+                            data-bs-toggle="tab" data-bs-target="#usados" type="button" role="tab"
+                            onclick="setTab('usados')">
+                            <i class="bi bi-archive me-2"></i>Historial de Uso ({{ $usados->total() }})
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
                         <button class="nav-link px-4 py-3 fw-bold border-0 rounded-0" id="anulados-tab"
-                            data-bs-toggle="tab" data-bs-target="#anulados" type="button" role="tab">
-                            <i class="bi bi-x-octagon me-2"></i>Anulados ({{ $anulados->count() }})
+                            data-bs-toggle="tab" data-bs-target="#anulados" type="button" role="tab"
+                            onclick="setTab('anulados')">
+                            <i class="bi bi-x-octagon me-2"></i>Anulados ({{ $anulados->total() }})
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link px-4 py-3 fw-bold border-0 rounded-0" id="todos-tab"
+                            data-bs-toggle="tab" data-bs-target="#todos" type="button" role="tab"
+                            onclick="setTab('todos')">
+                            <i class="bi bi-list-ul me-2"></i>Total Ingresos ({{ $todos->total() }})
                         </button>
                     </li>
                 </ul>
@@ -158,6 +183,9 @@
                                 </tbody>
                             </table>
                         </div>
+                        <div class="p-3 border-top">
+                            {{ $enLogistica->appends(['q' => $search, 'tab' => 'disponibles'])->links() }}
+                        </div>
                     </div>
 
                     {{-- Historial de Traslados --}}
@@ -188,6 +216,9 @@
                                     @endforelse
                                 </tbody>
                             </table>
+                        </div>
+                        <div class="p-3 border-top">
+                            {{ $transferencias->appends(['q' => $search, 'tab' => 'historial'])->links() }}
                         </div>
                     </div>
 
@@ -227,6 +258,9 @@
                                     @endforelse
                                 </tbody>
                             </table>
+                        </div>
+                        <div class="p-3 border-top">
+                            {{ $usados->appends(['q' => $search, 'tab' => 'usados'])->links() }}
                         </div>
                     </div>
 
@@ -276,6 +310,75 @@
                                 </tbody>
                             </table>
                         </div>
+                        <div class="p-3 border-top">
+                            {{ $anulados->appends(['q' => $search, 'tab' => 'anulados'])->links() }}
+                        </div>
+                    </div>
+
+                    {{-- Todos los Ingresos --}}
+                    <div class="tab-pane fade" id="todos" role="tabpanel">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-4">Código</th>
+                                        <th>Tipo</th>
+                                        <th>Fecha Ingreso</th>
+                                        <th>Estado Actual</th>
+                                        <th>¿Consumido?</th>
+                                        <th>Detalles</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($todos as $precinto)
+                                        <tr>
+                                            <td class="ps-4 fw-bold">{{ $precinto->codigo }}</td>
+                                            <td><span class="badge bg-secondary bg-opacity-10 text-secondary">{{ $precinto->tipo }}</span></td>
+                                            <td>{{ $precinto->created_at->format('d/m/Y H:i') }}</td>
+                                            <td>
+                                                @switch($precinto->estado)
+                                                    @case('disponible')
+                                                        <span class="badge bg-success">Disponible</span>
+                                                        @break
+                                                    @case('en_logistica')
+                                                        <span class="badge bg-warning text-dark">En Logística</span>
+                                                        @break
+                                                    @case('usado')
+                                                        <span class="badge bg-primary">Consumido / Usado</span>
+                                                        @break
+                                                    @case('anulado')
+                                                        <span class="badge bg-danger">Anulado</span>
+                                                        @break
+                                                    @default
+                                                        <span class="badge bg-secondary">{{ $precinto->estado }}</span>
+                                                @endswitch
+                                            </td>
+                                            <td>
+                                                @if($precinto->estado == 'usado')
+                                                    <span class="text-success fw-bold"><i class="bi bi-check-circle-fill me-1"></i>SÍ</span>
+                                                @elseif($precinto->estado == 'anulado')
+                                                    <span class="text-danger fw-bold"><i class="bi bi-x-circle-fill me-1"></i>RECHAZADO</span>
+                                                @else
+                                                    <span class="text-muted"><i class="bi bi-circle me-1"></i>NO</span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @if($precinto->form_response_id)
+                                                    <a href="{{ route('despacho.show', $precinto->form_response_id) }}" class="btn btn-sm btn-link">Ver Inspección</a>
+                                                @else
+                                                    -
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr><td colspan="6" class="text-center py-5 text-muted">No hay registros de precintos.</td></tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="p-3 border-top">
+                            {{ $todos->appends(['q' => $search, 'tab' => 'todos'])->links() }}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -283,6 +386,27 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Set tab in URL to preserve state on refresh/pagination
+        function setTab(tabName) {
+            const url = new URL(window.location);
+            url.searchParams.set('tab', tabName);
+            window.history.replaceState({}, '', url);
+        }
+
+        // Activate tab from URL on load
+        document.addEventListener('DOMContentLoaded', function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const activeTab = urlParams.get('tab');
+            if (activeTab) {
+                const tabEl = document.querySelector(`#${activeTab}-tab`);
+                if (tabEl) {
+                    const tab = new bootstrap.Tab(tabEl);
+                    tab.show();
+                }
+            }
+        });
+    </script>
 </body>
 
 </html>

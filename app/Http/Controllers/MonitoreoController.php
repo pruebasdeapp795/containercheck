@@ -125,8 +125,8 @@ class MonitoreoController extends Controller
     // Visualizador Methods
     public function indexViewer()
     {
-        $responses = FormResponse::whereIn('status', ['pending_monitoreo', 'completed'])
-            ->with(['formVersion', 'user'])
+        $responses = FormResponse::whereIn('status', ['pending_monitoreo', 'completed', 'rejected'])
+            ->with(['formVersion', 'user', 'monitoreoUser'])
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 
@@ -144,21 +144,53 @@ class MonitoreoController extends Controller
     }
 
 
-    public function inventario()
+    public function inventario(Request $request)
     {
-        $disponibles = Precinto::where('estado', 'disponible')->orderBy('created_at', 'desc')->get();
-        $enLogistica = Precinto::where('estado', 'en_logistica')->orderBy('created_at', 'desc')->get();
-        $usados = Precinto::where('estado', 'usado')->orderBy('usado_at', 'desc')->take(100)->get();
-        $anulados = Precinto::where('estado', 'anulado')->orderBy('updated_at', 'desc')->take(100)->get();
+        $search = $request->get('q');
 
-        // New Statistics
+        // Search & Paginate Disponsibles
+        $disponiblesQuery = Precinto::where('estado', 'disponible');
+        if ($search) {
+            $disponiblesQuery->where('codigo', 'LIKE', "%$search%");
+        }
+        $disponibles = $disponiblesQuery->orderBy('created_at', 'desc')->paginate(20, ['*'], 'p_disp');
+
+        // Search & Paginate En Logística
+        $enLogisticaQuery = Precinto::where('estado', 'en_logistica');
+        if ($search) {
+            $enLogisticaQuery->where('codigo', 'LIKE', "%$search%");
+        }
+        $enLogistica = $enLogisticaQuery->orderBy('created_at', 'desc')->paginate(20, ['*'], 'p_log');
+
+        // Search & Paginate Usados
+        $usadosQuery = Precinto::where('estado', 'usado');
+        if ($search) {
+            $usadosQuery->where('codigo', 'LIKE', "%$search%");
+        }
+        $usados = $usadosQuery->orderBy('usado_at', 'desc')->paginate(20, ['*'], 'p_used');
+
+        // Search & Paginate Anulados
+        $anuladosQuery = Precinto::where('estado', 'anulado');
+        if ($search) {
+            $anuladosQuery->where('codigo', 'LIKE', "%$search%");
+        }
+        $anulados = $anuladosQuery->orderBy('updated_at', 'desc')->paginate(20, ['*'], 'p_null');
+
+        // New: Search & Paginate ALL records (Ingresados)
+        $todosQuery = Precinto::query();
+        if ($search) {
+            $todosQuery->where('codigo', 'LIKE', "%$search%");
+        }
+        $todos = $todosQuery->orderBy('created_at', 'desc')->paginate(20, ['*'], 'p_all');
+
+        // Statistics
         $totalIngresados = Precinto::count();
         $usoMensual = Precinto::whereIn('estado', ['usado', 'anulado'])
             ->whereMonth('updated_at', now()->month)
             ->whereYear('updated_at', now()->year)
             ->count();
 
-        // Group by type and state 'disponible' to show what can be transferred
+        // Group by type (still needs total counts for the cards)
         $disponiblesPorTipo = Precinto::where('estado', 'disponible')
             ->select('tipo', \Illuminate\Support\Facades\DB::raw('count(*) as total'))
             ->groupBy('tipo')
@@ -169,9 +201,11 @@ class MonitoreoController extends Controller
             'enLogistica',
             'usados',
             'anulados',
+            'todos',
             'disponiblesPorTipo',
             'totalIngresados',
-            'usoMensual'
+            'usoMensual',
+            'search'
         ));
     }
 

@@ -49,30 +49,39 @@
             <a class="navbar-brand" href="#">
                 <img src="{{ asset('imagenes/containerchecklogov.png') }}" width="140px" alt="ContainerCheck">
             </a>
-            <div class="d-flex align-items-center">
-                <span class="badge bg-secondary text-white me-3">Perfil: Monitoreo</span>
 
-                @if(Auth::user()->saved_signature)
-                    <span class="badge bg-success text-white me-2">
-                        <i class="bi bi-check-circle-fill"></i> Firma Cargada
-                    </span>
-                    <button class="btn btn-sm btn-outline-primary me-2" data-bs-toggle="modal"
-                        data-bs-target="#signatureModal">
-                        <i class="bi bi-pencil"></i> Actualizar Firma
-                    </button>
-                @else
-                    <span class="badge bg-warning text-dark me-2">
-                        <i class="bi bi-exclamation-triangle-fill"></i> Sin Firma
-                    </span>
-                    <button class="btn btn-sm btn-primary me-2" data-bs-toggle="modal" data-bs-target="#signatureModal">
-                        <i class="bi bi-upload"></i> Cargar Firma
-                    </button>
-                @endif
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMonitoreo">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
-                <form action="{{ route('logout') }}" method="POST" class="d-inline">
-                    @csrf
-                    <button type="submit" class="btn btn-sm btn-outline-danger">Cerrar Sesión</button>
-                </form>
+            <div class="collapse navbar-collapse" id="navbarMonitoreo">
+                <div class="ms-auto d-flex flex-column flex-lg-row align-items-lg-center gap-3 mt-3 mt-lg-0">
+                    <span class="badge bg-secondary text-white">Perfil: Monitoreo</span>
+
+                    @if(Auth::user()->saved_signature)
+                        <span class="badge bg-success text-white">
+                            <i class="bi bi-check-circle-fill"></i> Firma Cargada
+                        </span>
+                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
+                            data-bs-target="#signatureModal">
+                            <i class="bi bi-pencil"></i> Actualizar Firma
+                        </button>
+                    @else
+                        <span class="badge bg-warning text-dark">
+                            <i class="bi bi-exclamation-triangle-fill"></i> Sin Firma
+                        </span>
+                        <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#signatureModal">
+                            <i class="bi bi-upload"></i> Cargar Firma
+                        </button>
+                    @endif
+
+                    <form action="{{ route('logout') }}" method="POST" class="d-inline">
+                        @csrf
+                        <button type="submit" class="btn btn-sm btn-outline-danger w-100">
+                            <i class="bi bi-box-arrow-right me-1"></i>Cerrar Sesión
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </nav>

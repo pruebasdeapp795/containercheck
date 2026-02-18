@@ -67,6 +67,8 @@ class FormConfigController extends Controller
                     'type' => $field->type,
                     'options' => $field->options,
                     'rejection_value' => $field->rejection_value,
+                    'is_required' => $field->is_required ?? true,
+                    'is_precinto' => $field->is_precinto ?? false,
                     'order' => $field->order,
                     'is_visible' => $field->is_visible ?? true
                 ]);
@@ -106,7 +108,9 @@ class FormConfigController extends Controller
             'label' => 'required|string',
             'type' => 'required|in:text,numeric,date,time,photo,select',
             'options' => 'nullable|string',
-            'rejection_value' => 'nullable|string'
+            'rejection_value' => 'nullable|string',
+            'is_required' => 'nullable|boolean',
+            'is_precinto' => 'nullable|boolean'
         ]);
 
         $phase->fields()->create([
@@ -114,6 +118,8 @@ class FormConfigController extends Controller
             'type' => $request->type,
             'options' => $request->options,
             'rejection_value' => $request->rejection_value,
+            'is_required' => $request->has('is_required'),
+            'is_precinto' => $request->has('is_precinto'),
             'order' => $phase->fields()->count()
         ]);
 
@@ -126,7 +132,9 @@ class FormConfigController extends Controller
             'label' => 'required|string',
             'type' => 'required|in:text,numeric,date,time,photo,select',
             'options' => 'nullable|string',
-            'rejection_value' => 'nullable|string'
+            'rejection_value' => 'nullable|string',
+            'is_required' => 'nullable|boolean',
+            'is_precinto' => 'nullable|boolean'
         ]);
 
         $field->update([
@@ -134,6 +142,8 @@ class FormConfigController extends Controller
             'type' => $request->type,
             'options' => $request->options,
             'rejection_value' => $request->rejection_value,
+            'is_required' => $request->has('is_required'),
+            'is_precinto' => $request->has('is_precinto'),
             'is_visible' => $request->has('is_visible')
         ]);
 

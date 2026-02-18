@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Field extends Model
 {
-    protected $fillable = ['phase_id', 'label', 'type', 'options', 'rejection_value', 'is_visible', 'order'];
+    protected $fillable = ['phase_id', 'label', 'type', 'options', 'rejection_value', 'is_required', 'is_precinto', 'is_visible', 'order'];
 
     public function phase()
     {

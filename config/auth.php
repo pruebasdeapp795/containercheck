@@ -42,15 +42,15 @@ return [
         ],
         'admin' => [
             'driver' => 'session',
-            'provider' => 'admins',
+            'provider' => 'users',
         ],
         'control_riesgo' => [
             'driver' => 'session',
-            'provider' => 'control_riesgos',
+            'provider' => 'users',
         ],
         'personal' => [
             'driver' => 'session',
-            'provider' => 'personals',
+            'provider' => 'users',
         ],
     ],
 

@@ -14,17 +14,29 @@ class RoleMiddleware
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next, $roles, $guard = 'web'): Response
+    public function handle(Request $request, Closure $next, ...$roles): Response
     {
-        if (!Auth::guard($guard)->check()) {
-            return redirect('/');
+        if (!Auth::check()) {
+            return redirect()->route('portal');
         }
 
-        $userRole = Auth::guard($guard)->user()->role;
-        $allowedRoles = explode(',', $roles);
+        $userRole = str_replace('-', '_', Auth::user()->role);
 
-        if (!in_array($userRole, $allowedRoles)) {
-            return redirect('/');
+        // If 'roles' contains a comma-separated string in the first element, split it
+        if (count($roles) === 1 && str_contains($roles[0], ',')) {
+            $roles = explode(',', $roles[0]);
+        }
+
+        // Normalize allowed roles for comparison
+        $normalizedRoles = array_map(fn($r) => str_replace('-', '_', trim($r)), $roles);
+
+        if (!in_array($userRole, $normalizedRoles)) {
+            // Avoid redirect loops: if we are already at the redirect destination, don't redirect again
+            if ($request->routeIs('portal')) {
+                Auth::logout();
+                return $next($request);
+            }
+            return redirect()->route('portal')->withErrors(['usuario' => 'No tiene permisos para acceder a esta sección.']);
         }
 
         return $next($request);

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vista Visualizador - #{{ $response->id }}</title>
+    <title>Vista Control Riesgo - #{{ $response->id }}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         :root {
@@ -23,11 +23,41 @@
         }
 
         .report-custom-container {
-            max-width: 307mm;
+            max-width: 250mm;
+            /* Adjusted for better visibility */
             margin: 20px auto;
             background: white;
             padding: 10mm;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        @media (max-width: 991.98px) {
+            .report-custom-container {
+                max-width: 100%;
+                margin: 0;
+                padding: 15px;
+            }
+
+            .data-item {
+                width: 100% !important;
+                border-right: none !important;
+            }
+
+            .data-label {
+                width: 150px !important;
+                min-width: 120px;
+            }
+
+            .header-table td {
+                display: block;
+                width: 100% !important;
+                text-align: center !important;
+            }
+
+            .header-info-box {
+                text-align: center !important;
+                margin-top: 10px;
+            }
         }
 
         /* Estilos del reporte */
@@ -140,15 +170,41 @@
 </head>
 
 <body>
+    @if($response->status === 'pending_monitoreo' || $response->status === 'rejected')
+        <style>
+            .watermark {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%) rotate(-45deg);
+                font-size: 80px;
+                color: rgba(255, 0, 0, 0.2);
+                z-index: 9999;
+                pointer-events: none;
+                font-weight: bold;
+                border: 5px solid rgba(255, 0, 0, 0.2);
+                padding: 20px;
+                text-transform: uppercase;
+                white-space: nowrap;
+            }
+        </style>
+        @if($response->status === 'pending_monitoreo')
+            <div class="watermark">PENDIENTE LIBERACIÓN</div>
+        @else
+            <div class="watermark">REPORTE RECHAZADO</div>
+        @endif
+    @endif
     <div class="container-fluid no-print py-3 bg-white border-bottom shadow-sm fixed-top">
         <div class="d-flex justify-content-between align-items-center container">
-            <a href="{{ route('visualizador.index') }}" class="btn btn-outline-secondary">
+            <a href="{{ route('control-riesgo.index') }}" class="btn btn-outline-secondary">
                 &larr; Volver
             </a>
-            <h5 class="m-0 fw-bold">Inspección #{{ $response->id }} (Solo Lectura)</h5>
+            <h5 class="m-0 fw-bold d-none d-md-block">Inspección #{{ $response->id }}</h5>
+            <h5 class="m-0 fw-bold d-md-none">#{{ $response->id }}</h5>
             <div>
-                <span class="badge {{ $response->status == 'completed' ? 'bg-success' : 'bg-warning text-dark' }}">
-                    {{ $response->status == 'completed' ? 'LIBERADA' : 'PENDIENTE' }}
+                <span
+                    class="badge {{ $response->status == 'completed' ? 'bg-success' : ($response->status == 'rejected' ? 'bg-danger' : 'bg-warning text-dark') }}">
+                    {{ $response->status == 'completed' ? 'LIBERADA' : ($response->status == 'rejected' ? 'RECHAZADA' : 'PENDIENTE') }}
                 </span>
             </div>
         </div>
@@ -172,7 +228,7 @@
                     <strong>FECHA:</strong> {{ $response->created_at->format('d/m/Y') }}<br>
                     <strong>HORA:</strong> {{ $response->created_at->format('H:i') }}<br>
                     <strong>DESPACHADOR:</strong> {{ $response->user->name }}<br>
-                    <strong>EXPORTACIÓN</strong> 
+                    <strong>EXPORTACIÓN</strong>
                 </td>
             </tr>
         </table>
@@ -248,6 +304,13 @@
                 class="small text-decoration-none">Ver Galería &rarr;</a>
         </div>
 
+        {{-- Motivo de Rechazo if applicable --}}
+        @if($response->status === 'rejected' && $response->rejection_reason)
+            <div class="alert alert-danger mt-4">
+                <strong><i class="bi bi-x-circle-fill"></i> Motivo de Rechazo:</strong> {{ $response->rejection_reason }}
+            </div>
+        @endif
+
         {{-- Firmas --}}
         <div class="mt-4 row">
             <div class="col-6 text-center">
@@ -265,8 +328,16 @@
                 @if($response->monitoreo_signature)
                     <img src="{{ $response->monitoreo_signature }}" style="max-height: 60px; margin-bottom: 5px;"><br>
                     <div style="border-top: 1px solid #000; width: 80%; margin: 0 auto;"></div>
-                    <small class="fw-bold">MONITOREO</small><br>
+                    <small class="fw-bold">MONITOREO (AUTORIZADO)</small><br>
                     <small class="text-muted">{{ $response->monitoreoUser->name ?? 'Firma Autorizada' }}</small><br>
+                    <small class="text-muted">CC: {{ $response->monitoreoUser->cedula ?? 'N/A' }}</small>
+                @elseif($response->status === 'rejected')
+                    <div style="height: 65px; display: flex; align-items: center; justify-content: center;">
+                        <span class="text-danger fw-bold">RECHAZADA</span>
+                    </div>
+                    <div style="border-top: 1px solid #dc3545; width: 80%; margin: 0 auto;"></div>
+                    <small class="fw-bold text-danger">MONITOREO (RECHAZO)</small><br>
+                    <small class="text-muted">{{ $response->monitoreoUser->name ?? 'N/A' }}</small><br>
                     <small class="text-muted">CC: {{ $response->monitoreoUser->cedula ?? 'N/A' }}</small>
                 @else
                     <div style="height: 65px;"></div>

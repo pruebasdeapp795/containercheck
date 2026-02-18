@@ -243,7 +243,7 @@
         <button class="btn-print" onclick="window.print()">Descargar Reporte PDF</button>
     </div>
 
-    @if($response->status === 'pending_monitoreo')
+    @if($response->status === 'pending_monitoreo' || $response->status === 'rejected')
         <style>
             .watermark {
                 position: fixed;
@@ -258,9 +258,14 @@
                 border: 5px solid rgba(255, 0, 0, 0.2);
                 padding: 20px;
                 text-transform: uppercase;
+                white-space: nowrap;
             }
         </style>
-        <div class="watermark">PENDIENTE LIBERACIÓN</div>
+        @if($response->status === 'pending_monitoreo')
+            <div class="watermark">PENDIENTE LIBERACIÓN</div>
+        @else
+            <div class="watermark">REPORTE RECHAZADO</div>
+        @endif
     @endif
 
     @php 

@@ -23,7 +23,7 @@
     <div class="main-container">
         <div class="login-card">
             <h2>Control Riesgo</h2>
-            <p class="text-muted small">Acceso para Despacho, Monitoreo y Visualizador.</p>
+            <p class="text-muted small">Acceso para Despacho, Monitoreo y Comex.</p>
 
             <form action="{{ route('login.control-riesgo') }}" method="POST">
                 @csrf

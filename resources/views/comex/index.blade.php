@@ -280,7 +280,8 @@
                                 <td>{{ $ins->getFieldValue('Cliente') ?? 'N/A' }}</td>
                                 <td>
                                     {{ $ins->user->name ?? 'N/A' }}<br>
-                                    <small class="text-muted">Rechazado por: {{ $ins->monitoreoUser->name ?? 'incumplimiento de la norma' }}</small>
+                                    <small class="text-muted">Rechazado por:
+                                        {{ $ins->monitoreoUser->name ?? 'incumplimiento de la norma' }}</small>
                                 </td>
                                 <td>
                                     <span class="text-danger fw-500">{{ $ins->getRejectionReason() }}</span>
@@ -355,7 +356,19 @@
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
-                    y: { beginAtZero: true, grid: { display: false } },
+                    y: {
+                        beginAtZero: true,
+                        grid: { display: false },
+                        ticks: {
+                            // Esta función obliga a que solo se muestren enteros
+                            stepSize: 1,
+                            callback: function (value) {
+                                if (value % 1 === 0) {
+                                    return value;
+                                }
+                            }
+                        }
+                    },
                     x: { grid: { display: false } }
                 }
             }

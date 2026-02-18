@@ -37,7 +37,7 @@
             <div class="col-lg-4 offset-lg-1">
                 <div class="d-grid gap-3">
                     <a href="{{ route('login.admin') }}" class="access-card">Ingresar como Administrador</a>
-                    <a href="{{ route('login.control-riesgo') }}" class="access-card">Panel Control Riesgo / COMEX</a>
+                    <a href="{{ route('login.control-riesgo') }}" class="access-card">Control</a>
                     <a href="{{ route('login.personal') }}" class="access-card">Acceso Personal</a>
                 </div>
             </div>

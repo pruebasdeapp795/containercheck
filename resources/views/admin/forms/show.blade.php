@@ -127,7 +127,11 @@
                                         <span>
                                             <strong>{{ $field->label }}</strong>
                                             <span class="badge bg-light text-dark ms-2">{{ $field->type }}</span>
-                                            @if(!$field->is_visible) <small class="text-muted">(Oculto)</small> @endif
+                                            @if($field->is_required) <span class="badge bg-danger ms-1"
+                                            style="font-size: 0.6rem;">OBLIGATORIO</span> @endif
+                                            @if($field->is_precinto) <span class="badge bg-warning text-dark ms-1"
+                                            style="font-size: 0.6rem;">PRECINTO</span> @endif
+                                            @if(!$field->is_visible) <small class="text-muted ms-1">(Oculto)</small> @endif
                                         </span>
                                     </div>
                                     <div class="d-flex gap-1">
@@ -196,11 +200,25 @@
                                                         <small class="text-muted">Si el usuario selecciona este valor
                                                             exacto, la inspección se cancelará automáticamente.</small>
                                                     </div>
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" type="checkbox" name="is_visible" value="1"
-                                                            id="visField{{ $field->id }}" {{ $field->is_visible ? 'checked' : '' }}>
-                                                        <label class="form-check-label"
-                                                            for="visField{{ $field->id }}">Visible</label>
+                                                    <div class="d-flex gap-3 mb-2">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" name="is_required"
+                                                                value="1" id="reqField{{ $field->id }}" {{ $field->is_required ? 'checked' : '' }}>
+                                                            <label class="form-check-label"
+                                                                for="reqField{{ $field->id }}">Obligatorio</label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" name="is_precinto"
+                                                                value="1" id="preField{{ $field->id }}" {{ $field->is_precinto ? 'checked' : '' }}>
+                                                            <label class="form-check-label" for="preField{{ $field->id }}">Es
+                                                                Precinto</label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" name="is_visible"
+                                                                value="1" id="visField{{ $field->id }}" {{ $field->is_visible ? 'checked' : '' }}>
+                                                            <label class="form-check-label"
+                                                                for="visField{{ $field->id }}">Visible</label>
+                                                        </div>
                                                     </div>
                                                 </div>
                                                 <div class="modal-footer">
@@ -278,12 +296,17 @@
                                         <textarea name="options" class="form-control"
                                             placeholder="Opción 1, Opción 2, Opción 3"></textarea>
                                     </div>
-                                    <div class="mb-3 rejection-container" style="display:none">
-                                        <label class="form-label text-danger fw-bold">Valor de Rechazo
-                                            (Opcional)</label>
-                                        <input type="text" name="rejection_value" class="form-control" placeholder="Ej: No">
-                                        <small class="text-muted">Si el usuario selecciona este valor exacto, la
-                                            inspección se cancelará automáticamente.</small>
+                                    <div class="d-flex gap-3 mb-2">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="is_required" value="1"
+                                                id="reqNew{{ $phase->id }}" checked>
+                                            <label class="form-check-label" for="reqNew{{ $phase->id }}">Obligatorio</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="is_precinto" value="1"
+                                                id="preNew{{ $phase->id }}">
+                                            <label class="form-check-label" for="preNew{{ $phase->id }}">Es Precinto</label>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="modal-footer">

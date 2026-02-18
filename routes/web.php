@@ -20,7 +20,8 @@ Route::get('/', function () {
             return redirect()->route('monitoreo.index');
         }
         if ($role === 'visualizador') {
-            return redirect()->route('visualizador.index');
+            // Keep redirecting old visualizador users to the new prefix
+            return redirect()->route('control-riesgo.index');
         }
         if ($role === 'despacho') {
             return redirect()->route('despacho.index');
@@ -43,21 +44,10 @@ Route::prefix('login')->group(function () {
     Route::post('/admin', [AuthController::class, 'adminLogin']);
 });
 
-Route::middleware(['auth', 'role:control_riesgo'])->prefix('control-riesgo')->name('control-riesgo.')->group(function () {
-    Route::get('/dashboard', [App\Http\Controllers\ControlRiesgo\FormResponseController::class, 'dashboard'])->name('index');
-    Route::get('/inspecciones/nueva/{version}', [App\Http\Controllers\ControlRiesgo\FormResponseController::class, 'create'])->name('inspecciones.create');
-    Route::get('/inspecciones/{response}/continuar', [App\Http\Controllers\ControlRiesgo\FormResponseController::class, 'edit'])->name('inspecciones.edit');
-    Route::post('/inspecciones/{response}/fase', [App\Http\Controllers\ControlRiesgo\FormResponseController::class, 'savePhase'])->name('inspecciones.savePhase');
-    Route::post('/inspecciones/{response}/finalizar', [App\Http\Controllers\ControlRiesgo\FormResponseController::class, 'store'])->name('store');
-
-    Route::get('/reportes', [App\Http\Controllers\ControlRiesgo\FormResponseController::class, 'history'])->name('reportes');
-    Route::get('/reportes/{response}', [App\Http\Controllers\ControlRiesgo\FormResponseController::class, 'show'])->name('reportes.show');
-});
+// Old Control Riesgo routes removed as per request
 
 // Shared API routes
-Route::middleware(['auth', 'role:control_riesgo,despacho'])->group(function () {
-    Route::get('/api/search-user/{cedula}', [App\Http\Controllers\ControlRiesgo\FormResponseController::class, 'searchUserByCedula'])->name('api.searchUser');
-});
+// (Moved to the bottom with other API routes for better organization and wider accessibility)
 
 Route::middleware(['auth', 'role:personal'])->group(function () {
     Route::get('/personal/index', function () {
@@ -122,7 +112,7 @@ Route::middleware(['auth', 'role:monitoreo'])->prefix('monitoreo')->name('monito
     Route::post('/firma/cargar', [\App\Http\Controllers\MonitoreoController::class, 'uploadSignature'])->name('uploadSignature');
 });
 
-Route::middleware(['auth', 'role:visualizador'])->prefix('visualizador')->name('visualizador.')->group(function () {
+Route::middleware(['auth', 'role:visualizador,control_riesgo'])->prefix('control-riesgo')->name('control-riesgo.')->group(function () {
     Route::get('/index', [\App\Http\Controllers\MonitoreoController::class, 'indexViewer'])->name('index');
     Route::get('/inspeccion/{response}', [App\Http\Controllers\MonitoreoController::class, 'showViewer'])->name('show');
     Route::get('/inventario', [App\Http\Controllers\MonitoreoController::class, 'inventario'])->name('inventario');
@@ -153,8 +143,12 @@ Route::middleware(['auth', 'role:comex'])->prefix('comex')->name('comex.')->grou
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// API route for searching precintos
-Route::middleware('auth')->get('/api/search-precinto', [\App\Http\Controllers\MonitoreoController::class, 'searchPrecinto'])->name('api.searchPrecinto');
+// API routes for searching
+Route::middleware('auth')->group(function () {
+    Route::get('/api/search-precinto', [\App\Http\Controllers\MonitoreoController::class, 'searchPrecinto'])->name('api.searchPrecinto');
+    Route::get('/api/search-user/{cedula}', [App\Http\Controllers\ControlRiesgo\FormResponseController::class, 'searchUserByCedula'])->name('api.searchUser');
+    Route::get('/api/search-users', [App\Http\Controllers\ControlRiesgo\FormResponseController::class, 'searchUsers'])->name('api.searchUsers');
+});
 
 // Public route for inspection photos (Gallery)
 Route::get('/galeria/inspeccion/{response}', [App\Http\Controllers\ControlRiesgo\FormResponseController::class, 'gallery'])->name('reportes.gallery');

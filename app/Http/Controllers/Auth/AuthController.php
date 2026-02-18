@@ -53,14 +53,12 @@ class AuthController extends Controller
                 // Redirect based on role
                 if ($user->role === 'monitoreo') {
                     return redirect()->intended(route('monitoreo.index'));
-                } elseif ($user->role === 'visualizador') {
-                    return redirect()->intended(route('visualizador.index'));
+                } elseif ($user->role === 'visualizador' || $user->role === 'control_riesgo') {
+                    return redirect()->intended(route('control-riesgo.index'));
                 } elseif ($user->role === 'despacho') {
                     return redirect()->intended(route('despacho.index'));
                 } elseif ($user->role === 'comex') {
                     return redirect()->intended(route('comex.index'));
-                } else {
-                    return redirect()->intended(route('control-riesgo.index'));
                 }
             } else {
                 Auth::logout();

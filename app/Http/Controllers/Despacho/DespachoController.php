@@ -107,32 +107,44 @@ class DespachoController extends FormResponseController
     }
 
     // Inventory Methods (Updated to show what's in Logistica)
-    public function inventario()
+    public function inventario(Request $request)
     {
+        $search = $request->get('q');
+
         // Only show seals that have been transferred to logistics and are pending use
-        $enLogistica = Precinto::where('estado', 'en_logistica')
-            ->orderBy('updated_at', 'desc')
-            ->get();
+        $enLogisticaQuery = Precinto::where('estado', 'en_logistica');
+        if ($search) {
+            $enLogisticaQuery->where('codigo', 'LIKE', "%$search%");
+        }
+        $enLogistica = $enLogisticaQuery->orderBy('updated_at', 'desc')->paginate(20, ['*'], 'p_disp');
 
         // Show seals used by this module
-        $usados = Precinto::where('estado', 'usado')
-            ->whereNotNull('form_response_id')
-            ->orderBy('usado_at', 'desc')
-            ->take(50)
-            ->get();
+        $usadosQuery = Precinto::where('estado', 'usado')->whereNotNull('form_response_id');
+        if ($search) {
+            $usadosQuery->where('codigo', 'LIKE', "%$search%");
+        }
+        $usados = $usadosQuery->orderBy('usado_at', 'desc')->paginate(20, ['*'], 'p_used');
 
         // Show seals that were rejected (anulados)
-        $anulados = Precinto::where('estado', 'anulado')
-            ->orderBy('updated_at', 'desc')
-            ->take(50)
-            ->get();
+        $anuladosQuery = Precinto::where('estado', 'anulado');
+        if ($search) {
+            $anuladosQuery->where('codigo', 'LIKE', "%$search%");
+        }
+        $anulados = $anuladosQuery->orderBy('updated_at', 'desc')->paginate(20, ['*'], 'p_null');
+
+        // New: Search & Paginate ALL records
+        $todosQuery = Precinto::query();
+        if ($search) {
+            $todosQuery->where('codigo', 'LIKE', "%$search%");
+        }
+        $todos = $todosQuery->orderBy('created_at', 'desc')->paginate(20, ['*'], 'p_all');
 
         // Also get the history of transfers (Logistica table)
         $transferencias = \App\Models\Logistica::with('user')
             ->orderBy('fecha_traslado', 'desc')
-            ->get();
+            ->paginate(15, ['*'], 'p_trans');
 
-        return view('despacho.inventario.index', compact('enLogistica', 'transferencias', 'usados', 'anulados'));
+        return view('despacho.inventario.index', compact('enLogistica', 'transferencias', 'usados', 'anulados', 'todos', 'search'));
     }
 
     public function history()

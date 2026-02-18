@@ -15,6 +15,12 @@
             padding-bottom: 50px;
         }
 
+        .text-danger {
+            font-size: 1.1rem;
+            line-height: 0;
+            vertical-align: middle;
+        }
+
         .navbar {
             background-color: #ffffff !important;
             border-bottom: 1px solid #eee;
@@ -169,6 +175,48 @@
         .precinto-result-item:last-child {
             border-bottom: none;
         }
+
+        .user-results {
+            z-index: 10000;
+            max-height: 250px;
+            overflow-y: auto;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+            border: 1px solid #ced4da !important;
+            margin-top: 2px;
+        }
+
+        .user-result-item {
+            padding: 12px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #f1f1f1;
+            transition: all 0.2s;
+            background: white;
+            font-size: 0.9rem;
+        }
+
+        .user-result-item:hover {
+            background-color: #f1edff;
+            color: #6346ac;
+        }
+
+        .user-result-item:last-child {
+            border-bottom: none;
+        }
+        
+        .personal-card {
+            border: 1px solid #eee;
+            border-radius: 12px;
+            background: #fff;
+            transition: all 0.3s ease;
+        }
+        
+        .personal-card:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        .elevated-z {
+            z-index: 1050 !important;
+        }
     </style>
 </head>
 
@@ -228,16 +276,13 @@
                     <input type="hidden" name="phase_order" value="{{ $index }}">
                     
                     @if(str_contains(strtoupper($phase->name), 'PERSONAL DEL CARGUE'))
-                        {{-- Custom Repeater UI for Personal del Cargue --}}
                         <div id="personal-repeater-container">
                             @php
-                                // IDs: 57 (Nombre), 58 (Cargo), 59 (Chaleco), 65 (Cédula)
                                 $cedulasVal = $response->fieldResponses->where('field_id', 65)->first()?->value;
                                 $nombresVal = $response->fieldResponses->where('field_id', 57)->first()?->value;
                                 $cargosVal = $response->fieldResponses->where('field_id', 58)->first()?->value;
                                 $chalecosVal = $response->fieldResponses->where('field_id', 59)->first()?->value;
 
-                                // Decode if JSON (array), otherwise make single array
                                 $cedulas = json_decode($cedulasVal, true) ?? ($cedulasVal ? [$cedulasVal] : ['']);
                                 $nombres = json_decode($nombresVal, true) ?? ($nombresVal ? [$nombresVal] : ['']);
                                 $cargos = json_decode($cargosVal, true) ?? ($cargosVal ? [$cargosVal] : ['']);
@@ -247,49 +292,42 @@
                             @endphp
 
                             @foreach($cedulas as $i => $ced)
-                                <div class="card mb-3 personal-row shadow-sm border-light bg-light" id="person-row-{{ $i }}">
-                                    <div class="card-body p-3">
-                                        <div class="d-flex justify-content-between align-items-center mb-1">
-                                            <div class="d-flex align-items-center toggle-btn" onclick="togglePersonCard(this)">
-                                                <i class="bi bi-chevron-down me-2 toggle-icon"></i>
-                                                <span class="fw-bold text-secondary">Persona #<span class="row-number">{{ $i + 1 }}</span></span>
-                                                <span class="personal-summary ms-3">{{ $nombres[$i] ?? '' }} {{ $ced ? '- CC: ' . $ced : '' }}</span>
-                                            </div>
-                                            <div class="d-flex gap-2">
-                                                @if(!$isLocked && count($cedulas) > 1)
-                                                    <button type="button" class="btn btn-sm btn-outline-danger border-0" onclick="removePersonalRow(this)">
-                                                        <i class="bi bi-trash"></i>
-                                                    </button>
-                                                @endif
+                                <div class="personal-card p-3 mb-3 border shadow-sm" id="person-row-{{ $i }}">
+                                    <div class="row g-2 align-items-end">
+                                        <div class="col-12 d-flex justify-content-between mb-2">
+                                            <span class="badge bg-primary rounded-pill">Persona #{{ $i + 1 }}</span>
+                                            @if(!$isLocked && count($cedulas) > 1)
+                                                <button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="removePersonalRow(this)">
+                                                    <i class="bi bi-x-circle-fill"></i> Quitar
+                                                </button>
+                                            @endif
+                                        </div>
+                                        <div class="col-md-5">
+                                            <label class="form-label small fw-bold mb-1">Cédula</label>
+                                            <div class="position-relative">
+                                                <input type="text" inputmode="numeric" name="fields[65][]" 
+                                                    class="form-control cedula-input {{ $isLocked ? 'disabled-field' : '' }}" 
+                                                    value="{{ $ced }}" required placeholder="Escriba cédula..." autocomplete="off">
+                                                <div class="user-results shadow-sm d-none position-absolute w-100 bg-white border rounded" style="top: 100%; left: 0;"></div>
                                             </div>
                                         </div>
-                                        
-                                        <div class="card-body-content mt-3">
-                                            <div class="row g-2">
-                                                <div class="col-md-6 col-12">
-                                                    <label class="form-label small text-muted mb-1">Cédula</label>
-                                                    <div class="input-group">
-                                                        <input type="number" name="fields[65][]" class="form-control cedula-input {{ $isLocked ? 'disabled-field' : '' }}" 
-                                                            value="{{ $ced }}" required placeholder="Ingrese cédula" 
-                                                            onchange="searchPersonByCedula(this)">
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6 col-12">
-                                                    <label class="form-label small text-muted mb-1">Nombre Completo</label>
-                                                    <input type="text" name="fields[57][]" class="form-control nombre-input {{ $isLocked ? 'disabled-field' : '' }}" 
-                                                        value="{{ $nombres[$i] ?? '' }}" required placeholder="Ingrese nombre">
-                                                </div>
-                                                <div class="col-md-6 col-12">
-                                                    <label class="form-label small text-muted mb-1">Cargo</label>
-                                                    <input type="text" name="fields[58][]" class="form-control {{ $isLocked ? 'disabled-field' : '' }}" 
-                                                        value="{{ $cargos[$i] ?? '' }}" required placeholder="Ingrese cargo">
-                                                </div>
-                                                <div class="col-md-6 col-12">
-                                                    <label class="form-label small text-muted mb-1">No. Chaleco</label>
-                                                    <input type="text" name="fields[59][]" class="form-control {{ $isLocked ? 'disabled-field' : '' }}" 
-                                                        value="{{ $chalecos[$i] ?? '' }}" placeholder="Opcional">
-                                                </div>
-                                            </div>
+                                        <div class="col-md-7">
+                                            <label class="form-label small fw-bold mb-1">Nombre Completo</label>
+                                            <input type="text" name="fields[57][]" 
+                                                class="form-control nombre-input {{ $isLocked ? 'disabled-field' : '' }}" 
+                                                value="{{ $nombres[$i] ?? '' }}" required placeholder="Nombre autocompletado">
+                                        </div>
+                                        <div class="col-md-6 mt-2">
+                                            <label class="form-label small fw-bold mb-1">Cargo</label>
+                                            <input type="text" name="fields[58][]" 
+                                                class="form-control {{ $isLocked ? 'disabled-field' : '' }}" 
+                                                value="{{ $cargos[$i] ?? '' }}" required placeholder="Asistente, Auxiliar...">
+                                        </div>
+                                        <div class="col-md-6 mt-2">
+                                            <label class="form-label small fw-bold mb-1">No. Chaleco</label>
+                                            <input type="text" name="fields[59][]" 
+                                                class="form-control {{ $isLocked ? 'disabled-field' : '' }}" 
+                                                value="{{ $chalecos[$i] ?? '' }}" placeholder="Opcional">
                                         </div>
                                     </div>
                                 </div>
@@ -318,29 +356,33 @@
                                 @endphp
                                 <div class="{{ $isCabecera ? 'col-md-6' : 'col-12' }}">
                                     <label
-                                        class="form-label fw-semibold small text-uppercase text-muted">{{ $field->label }}</label>
+                                        class="form-label fw-semibold small text-uppercase text-muted">
+                                        {{ $field->label }}
+                                        @if($field->is_required) <span class="text-danger">*</span> @endif
+                                    </label>
     
                                     @if($field->type == 'text')
                                         @php
-                                            $isPrecinto01 = ($field->id == 164);
-                                            $isPrecinto02 = ($field->id == 165);
-                                            $isSatelital = ($field->id == 166);
+                                            $isPrecinto = $field->is_precinto;
+                                            $precintoType = 'Botella';
+                                            if (str_contains(strtoupper($field->label), 'GUAYA')) $precintoType = 'Guaya';
+                                            if (str_contains(strtoupper($field->label), 'SATELITAL')) $precintoType = 'Satelital';
                                         @endphp
                                         <div class="position-relative">
                                             <input type="text" name="fields[{{ $field->id }}]"
-                                                @if($isPrecinto01) data-precinto-type="Botella" @elseif($isPrecinto02) data-precinto-type="Guaya" @elseif($isSatelital) data-precinto-type="Satelital" @endif
-                                                class="form-control {{ ($isPrecinto01 || $isPrecinto02 || $isSatelital) ? 'precinto-search' : '' }} {{ $isLocked ? 'disabled-field' : '' }}" 
+                                                @if($isPrecinto) data-precinto-type="{{ $precintoType }}" @endif
+                                                class="form-control {{ $isPrecinto ? 'precinto-search' : '' }} {{ $isLocked ? 'disabled-field' : '' }}" 
                                                 value="{{ $fieldVal }}"
                                                 autocomplete="off"
-                                                required>
-                                            @if($isPrecinto01 || $isPrecinto02 || $isSatelital)
+                                                {{ $field->is_required ? 'required' : '' }}>
+                                            @if($isPrecinto)
                                                 <div class="precinto-results shadow-sm d-none position-absolute w-100 bg-white border rounded" style="z-index: 1000; max-height: 200px; overflow-y: auto;"></div>
                                             @endif
                                         </div>
                                     @elseif($field->type == 'numeric')
                                         <input type="number" step="any" name="fields[{{ $field->id }}]"
                                             class="form-control {{ $isLocked ? 'disabled-field' : '' }}" value="{{ $fieldVal }}"
-                                            required>
+                                            {{ $field->is_required ? 'required' : '' }}>
                                     @elseif($field->type == 'date')
                                         @php 
                                             $finalDate = $fieldVal ?? date('Y-m-d');
@@ -369,7 +411,7 @@
                                                 data-rejection="{{ $field->rejection_value }}" 
                                                 data-field-id="{{ $field->id }}"
                                                 onchange="handleSpecialSelect(this)"
-                                                required>
+                                                {{ $field->is_required ? 'required' : '' }}>
                                                 <option value="" disabled {{ !$fieldVal ? 'selected' : '' }}>Seleccione...</option>
                                                 @foreach($options as $option)
                                                     <option value="{{ trim($option) }}" {{ trim($fieldVal) == trim($option) ? 'selected' : '' }}>
@@ -596,6 +638,36 @@
 
         async function saveCurrentPhase(e, form) {
             e.preventDefault();
+            
+            // Check for required fields
+            const requiredFields = form.querySelectorAll('[required]');
+            for (let input of requiredFields) {
+                if (input.value.trim() === "") {
+                    // Try to find label
+                    let labelText = "campo obligatorio";
+                    const label = input.closest('.col-md-6, .col-12')?.querySelector('label');
+                    if (label) labelText = label.innerText.replace('*', '').trim();
+                    
+                    alert(`El campo "${labelText}" es obligatorio.`);
+                    input.focus();
+                    return;
+                }
+            }
+
+            // Check for required precintos (must select from list)
+            const requiredPrecintos = form.querySelectorAll('.precinto-search[required]');
+            for (let input of requiredPrecintos) {
+                if (!input.dataset.selectedFromSource) {
+                    let labelText = "Precinto";
+                    const label = input.closest('.position-relative')?.previousElementSibling;
+                    if (label) labelText = label.innerText.replace('*', '').trim();
+
+                    alert(`Por favor, seleccione un código de la lista de precintos disponibles para: ${labelText}`);
+                    input.focus();
+                    return;
+                }
+            }
+
             checkRejection(form); // Final safety check before processing
 
             if (form.dataset.hasRejection === "true") {
@@ -782,131 +854,53 @@
 
         function addPersonalRow() {
             const container = document.getElementById('personal-repeater-container');
-            
-            // Colapsar todas las filas anteriores para mantener orden
-            container.querySelectorAll('.personal-row').forEach(r => r.classList.add('collapsed'));
-            container.querySelectorAll('.toggle-icon').forEach(i => {
-                i.classList.remove('bi-chevron-down');
-                i.classList.add('bi-chevron-right');
-            });
-
-            const rowCount = container.querySelectorAll('.personal-row').length + 1;
+            const rowCount = container.querySelectorAll('.personal-card').length + 1;
             const newRow = document.createElement('div');
-            newRow.className = 'card mb-3 personal-row shadow-sm border-light bg-light';
+            newRow.className = 'personal-card p-3 mb-3 border shadow-sm';
             newRow.innerHTML = `
-                <div class="card-body p-3">
-                    <div class="d-flex justify-content-between align-items-center mb-1">
-                        <div class="d-flex align-items-center toggle-btn" onclick="togglePersonCard(this)">
-                            <i class="bi bi-chevron-down me-2 toggle-icon"></i>
-                            <span class="fw-bold text-secondary">Persona #<span class="row-number">${rowCount}</span></span>
-                            <span class="personal-summary ms-3">Nueva Persona</span>
-                        </div>
-                        <div class="d-flex gap-2">
-                            <button type="button" class="btn btn-sm btn-outline-danger border-0" onclick="removePersonalRow(this)">
-                                <i class="bi bi-trash"></i>
-                            </button>
+                <div class="row g-2 align-items-end">
+                    <div class="col-12 d-flex justify-content-between mb-2">
+                        <span class="badge bg-primary rounded-pill">Persona #${rowCount}</span>
+                        <button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="removePersonalRow(this)">
+                            <i class="bi bi-x-circle-fill"></i> Quitar
+                        </button>
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label small fw-bold mb-1">Cédula</label>
+                        <div class="position-relative">
+                            <input type="text" inputmode="numeric" name="fields[65][]" class="form-control cedula-input" required placeholder="Escriba cédula..." autocomplete="off">
+                            <div class="user-results shadow-sm d-none position-absolute w-100 bg-white border rounded" style="top: 100%; left: 0;"></div>
                         </div>
                     </div>
-                    <div class="card-body-content mt-3">
-                        <div class="row g-2">
-                            <div class="col-md-6 col-12">
-                                <label class="form-label small text-muted mb-1">Cédula</label>
-                                <input type="number" name="fields[65][]" class="form-control cedula-input" required placeholder="Ingrese cédula" onchange="searchPersonByCedula(this)">
-                            </div>
-                            <div class="col-md-6 col-12">
-                                <label class="form-label small text-muted mb-1">Nombre Completo</label>
-                                <input type="text" name="fields[57][]" class="form-control nombre-input" required placeholder="Ingrese nombre">
-                            </div>
-                            <div class="col-md-6 col-12">
-                                <label class="form-label small text-muted mb-1">Cargo</label>
-                                <input type="text" name="fields[58][]" class="form-control" required placeholder="Ingrese cargo">
-                            </div>
-                            <div class="col-md-6 col-12">
-                                <label class="form-label small text-muted mb-1">No. Chaleco</label>
-                                <input type="text" name="fields[59][]" class="form-control" placeholder="Opcional">
-                            </div>
-                        </div>
+                    <div class="col-md-7">
+                        <label class="form-label small fw-bold mb-1">Nombre Completo</label>
+                        <input type="text" name="fields[57][]" class="form-control nombre-input" required placeholder="Nombre autocompletado">
+                    </div>
+                    <div class="col-md-6 mt-2">
+                        <label class="form-label small fw-bold mb-1">Cargo</label>
+                        <input type="text" name="fields[58][]" class="form-control" required placeholder="Asistente, Auxiliar...">
+                    </div>
+                    <div class="col-md-6 mt-2">
+                        <label class="form-label small fw-bold mb-1">No. Chaleco</label>
+                        <input type="text" name="fields[59][]" class="form-control" placeholder="Opcional">
                     </div>
                 </div>
             `;
             container.appendChild(newRow);
-            
-            // Focus on the new cedula field
             newRow.querySelector('.cedula-input').focus();
         }
 
         function removePersonalRow(btn) {
-            const row = btn.closest('.personal-row');
+            const row = btn.closest('.personal-card');
             const container = document.getElementById('personal-repeater-container');
-            
-            if (container.querySelectorAll('.personal-row').length > 1) {
+            if (container.querySelectorAll('.personal-card').length > 1) {
                 row.remove();
-                container.querySelectorAll('.personal-row').forEach((r, index) => {
-                    r.querySelector('.row-number').textContent = index + 1;
+                container.querySelectorAll('.personal-card').forEach((r, index) => {
+                    r.querySelector('.badge').textContent = 'Persona #' + (index + 1);
                 });
-            } else {
-                alert("Debe haber al menos una persona registrada.");
             }
         }
 
-        function togglePersonCard(btn) {
-            const card = btn.closest('.personal-row');
-            const icon = btn.querySelector('.toggle-icon');
-            
-            if (card.classList.contains('collapsed')) {
-                card.classList.remove('collapsed');
-                icon.classList.remove('bi-chevron-right');
-                icon.classList.add('bi-chevron-down');
-            } else {
-                card.classList.add('collapsed');
-                icon.classList.remove('bi-chevron-down');
-                icon.classList.add('bi-chevron-right');
-            }
-        }
-
-        async function searchPersonByCedula(input) {
-            const cedula = input.value;
-            if (!cedula) return;
-
-            const row = input.closest('.personal-row');
-            const nombreInput = row.querySelector('.nombre-input');
-            const summarySpan = row.querySelector('.personal-summary');
-
-            // 1. Validar duplicados localmente
-            const currentCedulas = Array.from(document.querySelectorAll('.cedula-input'))
-                .filter(el => el !== input)
-                .map(el => el.value);
-
-            if (currentCedulas.includes(cedula)) {
-                alert('Esta cédula ya ha sido agregada en este cargue.');
-                input.value = '';
-                input.focus();
-                return;
-            }
-
-            // 2. Buscar en servidor
-            // Mostrar loader pequeño o feedback
-            input.classList.add('is-loading'); 
-            
-            try {
-                const response = await fetch(`/api/search-user/${cedula}`);
-                const data = await response.json();
-
-                if (data.found) {
-                    nombreInput.value = data.name;
-                    summarySpan.innerText = `${data.name} - CC: ${cedula}`;
-                    // Efecto visual de encontrado
-                    nombreInput.classList.add('is-valid');
-                    setTimeout(() => nombreInput.classList.remove('is-valid'), 2000);
-                } else {
-                    // Limpiar nombre si se cambió la cédula a una no registrada
-                    // pero dejar que el usuario escriba
-                    summarySpan.innerText = `Nueva Persona - CC: ${cedula}`;
-                }
-            } catch (error) {
-                console.error('Error buscando usuario:', error);
-            }
-        }
 
         // Sincronizar el summary cuando se escribe el nombre manualmente
         document.addEventListener('input', function(e) {
@@ -932,7 +926,8 @@
                 }
 
                 try {
-                    const response = await fetch(`/api/search-precinto?q=${query}&tipo=${tipo}`);
+                    input.dataset.selectedFromSource = ""; // Reset on input
+                    const response = await fetch(`{{ route('api.searchPrecinto') }}?q=${query}&tipo=${tipo}`);
                     const data = await response.json();
 
                     if (data.length > 0) {
@@ -943,6 +938,7 @@
                             div.innerText = item.codigo;
                             div.onclick = function() {
                                 input.value = item.codigo;
+                                input.dataset.selectedFromSource = "true";
                                 resultsContainer.classList.add('d-none');
                                 // Trigger change to ensure any other listeners (like rejection check) run
                                 input.dispatchEvent(new Event('change', { bubbles: true }));
@@ -960,10 +956,60 @@
             }
         });
 
+        // User Type-ahead logic
+        document.addEventListener('input', async function(e) {
+            if (e.target.classList.contains('cedula-input')) {
+                const input = e.target;
+                const query = input.value.trim();
+                const resultsContainer = input.nextElementSibling;
+                const row = input.closest('.personal-card'); // Fixed for new visual
+                const nombreInput = row.querySelector('.nombre-input');
+                const parentPosition = input.closest('.position-relative');
+
+                if (query.length < 2) {
+                    resultsContainer.classList.add('d-none');
+                    parentPosition.classList.remove('elevated-z');
+                    return;
+                }
+
+                try {
+                    parentPosition.classList.add('elevated-z');
+                    const response = await fetch(`{{ route('api.searchUsers') }}?q=${encodeURIComponent(query)}`);
+                    const data = await response.json();
+
+                    if (data && data.length > 0) {
+                        resultsContainer.innerHTML = '';
+                        data.forEach(item => {
+                            const div = document.createElement('div');
+                            div.className = 'user-result-item';
+                            div.innerHTML = `<i class="bi bi-person-fill me-2"></i><strong>${item.cedula}</strong> - ${item.name}`;
+                            div.onmousedown = function(event) {
+                                event.preventDefault();
+                                input.value = item.cedula;
+                                nombreInput.value = item.name;
+                                resultsContainer.classList.add('d-none');
+                                parentPosition.classList.remove('elevated-z');
+                                
+                                nombreInput.classList.add('is-valid');
+                                setTimeout(() => nombreInput.classList.remove('is-valid'), 2000);
+                            };
+                            resultsContainer.appendChild(div);
+                        });
+                        resultsContainer.classList.remove('d-none');
+                    } else {
+                        resultsContainer.innerHTML = '<div class="p-3 text-muted small"><i class="bi bi-info-circle me-1"></i>No encontrado. Puede ingresarlo manualmente.</div>';
+                        resultsContainer.classList.remove('d-none');
+                    }
+                } catch (error) {
+                    console.error('Error buscando usuario:', error);
+                }
+            }
+        });
+
         // Close results when clicking outside
         document.addEventListener('click', function(e) {
-            if (!e.target.classList.contains('precinto-search')) {
-                document.querySelectorAll('.precinto-results').forEach(el => el.classList.add('d-none'));
+            if (!e.target.classList.contains('precinto-search') && !e.target.classList.contains('cedula-input')) {
+                document.querySelectorAll('.precinto-results, .user-results').forEach(el => el.classList.add('d-none'));
             }
         });
 
