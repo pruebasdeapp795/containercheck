@@ -25,6 +25,9 @@ Route::get('/', function () {
         if ($role === 'despacho') {
             return redirect()->route('despacho.index');
         }
+        if ($role === 'comex') {
+            return redirect()->route('comex.index');
+        }
     }
     return view('portal.index');
 })->name('portal');
@@ -47,11 +50,13 @@ Route::middleware(['auth', 'role:control_riesgo'])->prefix('control-riesgo')->na
     Route::post('/inspecciones/{response}/fase', [App\Http\Controllers\ControlRiesgo\FormResponseController::class, 'savePhase'])->name('inspecciones.savePhase');
     Route::post('/inspecciones/{response}/finalizar', [App\Http\Controllers\ControlRiesgo\FormResponseController::class, 'store'])->name('store');
 
-    // API endpoint for searching users by cedula
-    Route::get('/api/search-user/{cedula}', [App\Http\Controllers\ControlRiesgo\FormResponseController::class, 'searchUserByCedula'])->name('api.searchUser');
-
     Route::get('/reportes', [App\Http\Controllers\ControlRiesgo\FormResponseController::class, 'history'])->name('reportes');
     Route::get('/reportes/{response}', [App\Http\Controllers\ControlRiesgo\FormResponseController::class, 'show'])->name('reportes.show');
+});
+
+// Shared API routes
+Route::middleware(['auth', 'role:control_riesgo,despacho'])->group(function () {
+    Route::get('/api/search-user/{cedula}', [App\Http\Controllers\ControlRiesgo\FormResponseController::class, 'searchUserByCedula'])->name('api.searchUser');
 });
 
 Route::middleware(['auth', 'role:personal'])->group(function () {
@@ -139,6 +144,11 @@ Route::middleware(['auth', 'role:despacho'])->prefix('despacho')->name('despacho
     // Report routes
     Route::get('/reportes', [App\Http\Controllers\Despacho\DespachoController::class, 'history'])->name('reportes');
     Route::get('/reportes/{response}', [App\Http\Controllers\Despacho\DespachoController::class, 'show'])->name('show');
+});
+
+Route::middleware(['auth', 'role:comex'])->prefix('comex')->name('comex.')->group(function () {
+    Route::get('/index', [\App\Http\Controllers\ComexController::class, 'index'])->name('index');
+    Route::get('/export/csv', [\App\Http\Controllers\ComexController::class, 'exportCsv'])->name('export.csv');
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

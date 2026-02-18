@@ -358,16 +358,36 @@
                                             readonly>
                                         <input type="hidden" name="fields[{{ $field->id }}]" value="{{ $finalTime }}">
                                     @elseif($field->type == 'select')
-                                        <select name="fields[{{ $field->id }}]"
-                                            class="form-select {{ $isLocked ? 'disabled-field' : '' }}"
-                                            data-rejection="{{ $field->rejection_value }}" required>
-                                            <option value="" disabled {{ !$fieldVal ? 'selected' : '' }}>Seleccione...</option>
-                                            @foreach(explode(',', $field->options) as $option)
-                                                <option value="{{ trim($option) }}" {{ $fieldVal == trim($option) ? 'selected' : '' }}>
-                                                    {{ trim($option) }}
-                                                </option>
-                                            @endforeach
-                                        </select>
+                                        @php
+                                            $isSpecial = str_contains(strtoupper($field->label), 'ARL') || str_contains(strtoupper($field->label), 'EPS');
+                                            $options = explode(',', $field->options);
+                                            $isOtherValue = $fieldVal && (!in_array(trim($fieldVal), array_map('trim', $options)));
+                                        @endphp
+                                        <div class="special-select-container">
+                                            <select name="{{ $isOtherValue ? '' : "fields[$field->id]" }}"
+                                                class="form-select {{ $isLocked ? 'disabled-field' : '' }} {{ $isSpecial ? 'special-select' : '' }}"
+                                                data-rejection="{{ $field->rejection_value }}" 
+                                                data-field-id="{{ $field->id }}"
+                                                onchange="handleSpecialSelect(this)"
+                                                required>
+                                                <option value="" disabled {{ !$fieldVal ? 'selected' : '' }}>Seleccione...</option>
+                                                @foreach($options as $option)
+                                                    <option value="{{ trim($option) }}" {{ trim($fieldVal) == trim($option) ? 'selected' : '' }}>
+                                                        {{ trim($option) }}
+                                                    </option>
+                                                @endforeach
+                                                @if($isSpecial)
+                                                    <option value="OTRO" {{ $isOtherValue ? 'selected' : '' }}>Otro...</option>
+                                                @endif
+                                            </select>
+                                            @if($isSpecial)
+                                                <input type="text" name="{{ $isOtherValue ? "fields[$field->id]" : '' }}"
+                                                    class="form-control mt-2 {{ $isOtherValue ? '' : 'd-none' }} special-input" 
+                                                    placeholder="Especifique otro..."
+                                                    value="{{ $isOtherValue ? $fieldVal : '' }}"
+                                                    {{ $isOtherValue ? 'required' : '' }}>
+                                            @endif
+                                        </div>
                                     @elseif($field->type == 'photo')
                                         <div class="photo-input-group">
                                             @if(!$isLocked)
@@ -869,7 +889,7 @@
             input.classList.add('is-loading'); 
             
             try {
-                const response = await fetch(`/control-riesgo/api/search-user/${cedula}`);
+                const response = await fetch(`/api/search-user/${cedula}`);
                 const data = await response.json();
 
                 if (data.found) {
@@ -946,6 +966,26 @@
                 document.querySelectorAll('.precinto-results').forEach(el => el.classList.add('d-none'));
             }
         });
+
+        // Special Select Logic
+        function handleSpecialSelect(select) {
+            const container = select.closest('.special-select-container');
+            const input = container.querySelector('.special-input');
+            const fieldId = select.dataset.fieldId;
+
+            if (select.value === 'OTRO') {
+                input.classList.remove('d-none');
+                input.required = true;
+                input.name = `fields[${fieldId}]`;
+                select.removeAttribute('name');
+                input.focus();
+            } else {
+                input.classList.add('d-none');
+                input.required = false;
+                input.removeAttribute('name');
+                select.name = `fields[${fieldId}]`;
+            }
+        }
     </script>
 </body>
 

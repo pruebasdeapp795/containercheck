@@ -45,7 +45,7 @@ class AuthController extends Controller
             $user = Auth::user();
 
             // Verify allowed roles for this portal
-            $allowedRoles = ['control_riesgo', 'monitoreo', 'visualizador', 'despacho'];
+            $allowedRoles = ['control_riesgo', 'monitoreo', 'visualizador', 'despacho', 'comex'];
 
             if (in_array($user->role, $allowedRoles)) {
                 $request->session()->regenerate();
@@ -57,6 +57,8 @@ class AuthController extends Controller
                     return redirect()->intended(route('visualizador.index'));
                 } elseif ($user->role === 'despacho') {
                     return redirect()->intended(route('despacho.index'));
+                } elseif ($user->role === 'comex') {
+                    return redirect()->intended(route('comex.index'));
                 } else {
                     return redirect()->intended(route('control-riesgo.index'));
                 }

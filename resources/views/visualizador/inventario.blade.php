@@ -116,12 +116,20 @@
             </div>
         </div>
 
-        {{-- Section for Type Breakdown (Optional but useful) --}}
+        {{-- Section for Type Breakdown with Quick Transfer --}}
         <div class="d-flex gap-2 mb-4 overflow-auto pb-2">
             @foreach($disponiblesPorTipo as $disponible)
-                <div class="badge bg-white text-dark border p-2 px-3 shadow-sm rounded-pill d-flex align-items-center">
-                    <span class="bullet bg-success me-2" style="width:8px; height:8px; border-radius:50%;"></span>
-                    {{ $disponible->tipo }}: <strong class="ms-1">{{ $disponible->total }}</strong>
+                <div class="card card-custom border-0 shadow-sm d-inline-flex flex-row align-items-center p-2 px-3 bg-white">
+                    <div class="me-3">
+                        <span class="bullet bg-success d-inline-block" style="width:8px; height:8px; border-radius:50%;"></span>
+                        <span class="small fw-bold text-muted text-uppercase ms-1">{{ $disponible->tipo }}</span>
+                        <div class="stat-value" style="font-size: 1.1rem;">{{ $disponible->total }} <small class="text-muted fw-normal" style="font-size: 0.7rem">disp.</small></div>
+                    </div>
+                    <button class="btn btn-sm btn-warning rounded-pill px-3 py-1 fw-bold" 
+                            style="font-size: 0.75rem;"
+                            onclick="openTransferModal('{{ $disponible->tipo }}', {{ $disponible->total }}, null)">
+                        <i class="bi bi-truck"></i> Trasladar
+                    </button>
                 </div>
             @endforeach
         </div>
