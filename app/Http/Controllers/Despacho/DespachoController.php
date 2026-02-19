@@ -16,20 +16,17 @@ class DespachoController extends FormResponseController
     public function index()
     {
         $user = Auth::user();
-        $totalInspections = FormResponse::where('user_id', $user->id)
-            ->whereIn('status', ['completed', 'pending_monitoreo'])
+        $totalInspections = FormResponse::whereIn('status', ['completed', 'pending_monitoreo'])
             ->count();
 
-        $recentInspections = FormResponse::where('user_id', $user->id)
-            ->whereIn('status', ['completed', 'pending_monitoreo'])
-            ->with('formVersion')
+        $recentInspections = FormResponse::whereIn('status', ['completed', 'pending_monitoreo'])
+            ->with(['formVersion', 'user'])
             ->latest()
             ->take(5)
             ->get();
 
-        $openInspections = FormResponse::where('user_id', $user->id)
-            ->where('status', 'draft')
-            ->with(['formVersion', 'formVersion.phases'])
+        $openInspections = FormResponse::where('status', 'draft')
+            ->with(['formVersion', 'formVersion.phases', 'user'])
             ->latest()
             ->get();
 
@@ -149,10 +146,8 @@ class DespachoController extends FormResponseController
 
     public function history()
     {
-        $user = Auth::user();
-        $responses = FormResponse::where('user_id', $user->id)
-            ->whereIn('status', ['completed', 'pending_monitoreo', 'rejected'])
-            ->with('formVersion')
+        $responses = FormResponse::whereIn('status', ['completed', 'pending_monitoreo', 'rejected'])
+            ->with(['formVersion', 'user'])
             ->orderBy('created_at', 'desc')
             ->get();
         return view('despacho.reportes.index', compact('responses'));
@@ -160,11 +155,8 @@ class DespachoController extends FormResponseController
 
     public function show(FormResponse $response)
     {
-        if ($response->user_id !== Auth::id()) {
-            abort(403);
-        }
-
-        if ($response->status === 'draft') {
+        // Allowed to see all inspections, but redirected to edit if it's their draft
+        if ($response->status === 'draft' && $response->user_id === Auth::id()) {
             return redirect()->route('despacho.inspecciones.edit', $response->id);
         }
 

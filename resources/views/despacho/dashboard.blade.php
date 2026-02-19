@@ -95,6 +95,7 @@
                                     <thead>
                                         <tr>
                                             <th>Formulario</th>
+                                            <th>Usuario</th>
                                             <th>Iniciado el</th>
                                             <th>Progreso</th>
                                             <th>Acción</th>
@@ -104,6 +105,11 @@
                                         @foreach($openInspections as $draft)
                                             <tr>
                                                 <td>{{ $draft->formVersion->version }}</td>
+                                                <td>
+                                                    <span class="badge bg-light text-dark fw-normal border">
+                                                        <i class="bi bi-person me-1"></i>{{ $draft->user->name ?? 'N/A' }}
+                                                    </span>
+                                                </td>
                                                 <td>{{ $draft->created_at->format('d/m/Y H:i') }}</td>
                                                 <td>
                                                     @php
@@ -119,10 +125,17 @@
                                                         fases</small>
                                                 </td>
                                                 <td>
-                                                    <a href="{{ route('despacho.inspecciones.edit', $draft->id) }}"
-                                                        class="btn btn-primary btn-sm rounded-pill">
-                                                        Continuar <i class="bi bi-arrow-right"></i>
-                                                    </a>
+                                                    @if($draft->user_id === Auth::id())
+                                                        <a href="{{ route('despacho.inspecciones.edit', $draft->id) }}"
+                                                            class="btn btn-primary btn-sm rounded-pill">
+                                                            Continuar <i class="bi bi-arrow-right"></i>
+                                                        </a>
+                                                    @else
+                                                        <button class="btn btn-secondary btn-sm rounded-pill opacity-50" disabled
+                                                            title="Solo el creador puede continuar">
+                                                            Continuar <i class="bi bi-lock"></i>
+                                                        </button>
+                                                    @endif
                                                 </td>
                                             </tr>
                                         @endforeach
@@ -154,34 +167,35 @@
                             <thead class="table-light">
                                 <tr>
                                     <th>Versión</th>
+                                    <th>Creado por</th>
                                     <th>Fecha</th>
                                     <th>Estado</th>
                                     <th>Acción</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($recentInspections as $ri)
+                                @foreach($recentInspections as $ri)
                                     <tr>
                                         <td class="fw-semibold">{{ $ri->formVersion->version }}</td>
+                                        <td>{{ $ri->user->name ?? 'N/A' }}</td>
                                         <td>{{ $ri->created_at->format('d/m/Y H:i') }}</td>
                                         <td>
                                             @if($ri->status === 'completed')
                                                 <span class="badge bg-success">Completada</span>
                                             @elseif($ri->status === 'pending_monitoreo')
                                                 <span class="badge bg-warning">Pendiente Monitoreo</span>
+                                            @elseif($ri->status === 'rejected')
+                                                <span class="badge bg-danger">Rechazada</span>
                                             @endif
                                         </td>
                                         <td>
                                             <a href="{{ route('despacho.show', $ri->id) }}"
-                                                class="btn btn-sm btn-outline-primary">Ver Reporte</a>
+                                                class="btn btn-sm btn-outline-primary shadow-sm rounded-3">
+                                                <i class="bi bi-eye"></i> Ver
+                                            </a>
                                         </td>
                                     </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="3" class="text-center text-muted py-4">No hay inspecciones finalizadas.
-                                        </td>
-                                    </tr>
-                                @endforelse
+                                @endforeach
                             </tbody>
                         </table>
                     </div>

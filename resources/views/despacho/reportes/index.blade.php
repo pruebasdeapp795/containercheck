@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mis Reportes - Despacho</title>
+    <title>Reportes de Inspección - Despacho</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
@@ -68,8 +68,8 @@
     <div class="container mt-5">
         <div class="row mb-4 align-items-center">
             <div class="col">
-                <h2>Mis Reportes</h2>
-                <p class="text-muted">Historial de inspecciones realizadas.</p>
+                <h2>Historial de Inspecciones</h2>
+                <p class="text-muted">Listado general de inspecciones realizadas por el equipo de despacho.</p>
             </div>
             <div class="col-auto">
                 <a href="{{ route('despacho.index') }}" class="btn btn-primary">
@@ -92,6 +92,7 @@
                         <tr>
                             <th>Fecha y Hora</th>
                             <th>Formulario</th>
+                            <th>Usuario</th>
                             <th>Estado</th>
                             <th>Acciones</th>
                         </tr>
@@ -101,6 +102,11 @@
                             <tr>
                                 <td>{{ $response->created_at->format('d/m/Y H:i') }}</td>
                                 <td>{{ $response->formVersion->version }}</td>
+                                <td>
+                                    <span class="small fw-semibold text-muted">
+                                        <i class="bi bi-person me-1"></i>{{ $response->user->name ?? 'N/A' }}
+                                    </span>
+                                </td>
                                 <td>
                                     @if($response->status == 'completed')
                                         <span class="badge badge-success px-3 py-2 rounded-pill">Completado</span>
@@ -121,7 +127,8 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="text-center py-5 text-muted">Aún no has realizado ninguna inspección.
+                                <td colspan="5" class="text-center py-5 text-muted">No se encontraron inspecciones
+                                    finalizadas.
                                 </td>
                             </tr>
                         @endforelse
