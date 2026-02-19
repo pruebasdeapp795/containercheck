@@ -189,6 +189,10 @@
                         <a class="nav-link {{ Route::is('admin.reports.*') ? 'active' : '' }}"
                             href="{{ route('admin.reports.index') }}">Reportes</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ Route::is('admin.users.*') ? 'active' : '' }}"
+                            href="{{ route('admin.users.index') }}">Usuarios</a>
+                    </li>
                 </ul>
 
                 <div class="profile-section ms-lg-4">

@@ -78,9 +78,7 @@ Route::middleware(['auth', 'role:personal'])->group(function () {
 });
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::get('/admin/index', function () {
-        return view('admin.index');
-    })->name('admin.index');
+    Route::get('/admin/index', [App\Http\Controllers\Admin\AdminController::class, 'index'])->name('admin.index');
 
     Route::prefix('admin/forms')->name('admin.forms.')->group(function () {
         Route::get('/', [App\Http\Controllers\Admin\FormConfigController::class, 'index'])->name('index');
@@ -101,6 +99,15 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::prefix('admin/reports')->name('admin.reports.')->group(function () {
         Route::get('/', [App\Http\Controllers\Admin\ReportController::class, 'index'])->name('index');
         Route::get('/{response}', [App\Http\Controllers\Admin\ReportController::class, 'show'])->name('show');
+    });
+
+    Route::prefix('admin/users')->name('admin.users.')->group(function () {
+        Route::get('/', [App\Http\Controllers\Admin\UserController::class, 'index'])->name('index');
+        Route::get('/create', [App\Http\Controllers\Admin\UserController::class, 'create'])->name('create');
+        Route::post('/', [App\Http\Controllers\Admin\UserController::class, 'store'])->name('store');
+        Route::get('/{user}/edit', [App\Http\Controllers\Admin\UserController::class, 'edit'])->name('edit');
+        Route::put('/{user}', [App\Http\Controllers\Admin\UserController::class, 'update'])->name('update');
+        Route::delete('/{user}', [App\Http\Controllers\Admin\UserController::class, 'destroy'])->name('destroy');
     });
 });
 
