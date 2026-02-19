@@ -56,8 +56,22 @@ class MonitoreoController extends Controller
             return redirect()->back()->with('error', 'Debe cargar su firma antes de liberar inspecciones.');
         }
 
+        // Convert file signature to Base64 to make it permanent in this record
+        // This prevents the signature from breaking if the user updates their profile signature later
+        $signaturePath = public_path($user->saved_signature);
+        $base64Signature = null;
+
+        if (file_exists($signaturePath)) {
+            $type = pathinfo($signaturePath, PATHINFO_EXTENSION);
+            $data = file_get_contents($signaturePath);
+            $base64Signature = 'data:image/' . $type . ';base64,' . base64_encode($data);
+        } else {
+            // Fallback if file doesn't exist for some reason, just use the path
+            $base64Signature = $user->saved_signature;
+        }
+
         $response->update([
-            'monitoreo_signature' => $user->saved_signature,
+            'monitoreo_signature' => $base64Signature,
             'monitoreo_signed_at' => now(),
             'monitoreo_user_id' => Auth::id(),
             'status' => 'completed'

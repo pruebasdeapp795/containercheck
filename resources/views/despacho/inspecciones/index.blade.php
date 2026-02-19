@@ -445,7 +445,8 @@
                                             <div id="preview_container_{{ $field->id }}" class="{{ !$fieldVal ? 'd-none' : '' }}">
                                                 <img id="preview_img_{{ $field->id }}"
                                                     src="{{ $fieldVal ? asset('storage/' . $fieldVal) : '' }}" class="img-thumbnail"
-                                                    style="max-height: 120px;">
+                                                    style="max-height: 120px; cursor: pointer;"
+                                                    onclick="showImageLarge(this.src)">
                                             </div>
                                         </div>
                                     @endif
@@ -546,6 +547,20 @@
         </div>
     </div>
 
+    <!-- Modal para ver fotos en grande -->
+    <div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content bg-transparent border-0">
+                <div class="modal-body p-0 text-center position-relative">
+                    <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" 
+                        style="filter: invert(1) grayscale(100%) brightness(200%); z-index: 1060;" 
+                        data-bs-dismiss="modal" aria-label="Close"></button>
+                    <img src="" id="modalPreviewImage" class="img-fluid rounded shadow-lg" style="max-height: 90vh;">
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -558,11 +573,23 @@
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
                 reader.onload = function (e) {
-                    document.getElementById('preview_container_' + id).classList.remove('d-none');
-                    document.getElementById('preview_img_' + id).src = e.target.result;
+                    const container = document.getElementById('preview_container_' + id);
+                    const img = document.getElementById('preview_img_' + id);
+                    container.classList.remove('d-none');
+                    img.src = e.target.result;
+                    img.style.cursor = 'pointer';
+                    img.onclick = function() { showImageLarge(this.src); };
                 }
                 reader.readAsDataURL(input.files[0]);
             }
+        }
+
+        function showImageLarge(src) {
+            if (!src) return;
+            const modalEl = document.getElementById('imagePreviewModal');
+            const modal = new bootstrap.Modal(modalEl);
+            document.getElementById('modalPreviewImage').src = src;
+            modal.show();
         }
 
         function lockPhaseUI(idx, form) {

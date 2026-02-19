@@ -94,6 +94,37 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* Lightbox Styles */
+        #lightbox {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        #lightbox img {
+            max-width: 90%;
+            max-height: 90%;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+        }
+
+        #lightbox .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+        }
     </style>
 </head>
 
@@ -109,13 +140,13 @@
             @foreach($photos as $photo)
                 <div class="photo-card">
                     <img src="{{ asset('storage/' . $photo['path']) }}" alt="{{ $photo['label'] }}"
-                        onclick="window.open(this.src, '_blank')">
+                        onclick="openLightbox(this.src)">
                     <div class="photo-info">
                         <div class="photo-label">{{ $photo['label'] }}</div>
                         @if ($photo['label'] == 'Foto de lado')
                             <div class="photo-date"># Contenedor: {{ $response->getContainerNumber() }}</div>
                         @endif
-                        
+
                     </div>
                 </div>
             @endforeach
@@ -129,6 +160,26 @@
     <footer style="margin-top: 50px; text-align: center; color: var(--text-muted); font-size: 0.8rem; padding: 20px;">
         &copy; {{ date('Y') }} Container Check - Control de Riesgos
     </footer>
+    <div id="lightbox" onclick="closeLightbox()">
+        <span class="close-btn">&times;</span>
+        <img id="lightbox-img" src="">
+    </div>
+
+    <script>
+        function openLightbox(src) {
+            document.getElementById('lightbox-img').src = src;
+            document.getElementById('lightbox').style.display = 'flex';
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightbox').style.display = 'none';
+        }
+
+        // Close on escape key
+        document.addEventListener('keydown', function (e) {
+            if (e.key === "Escape") closeLightbox();
+        });
+    </script>
 </body>
 
 </html>
