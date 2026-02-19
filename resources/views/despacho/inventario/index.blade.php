@@ -142,13 +142,6 @@
                             <i class="bi bi-x-octagon me-2"></i>Anulados ({{ $anulados->total() }})
                         </button>
                     </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link px-4 py-3 fw-bold border-0 rounded-0" id="todos-tab"
-                            data-bs-toggle="tab" data-bs-target="#todos" type="button" role="tab"
-                            onclick="setTab('todos')">
-                            <i class="bi bi-list-ul me-2"></i>Total Ingresos ({{ $todos->total() }})
-                        </button>
-                    </li>
                 </ul>
             </div>
             <div class="card-body p-0">
@@ -316,70 +309,7 @@
                     </div>
 
                     {{-- Todos los Ingresos --}}
-                    <div class="tab-pane fade" id="todos" role="tabpanel">
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th class="ps-4">Código</th>
-                                        <th>Tipo</th>
-                                        <th>Fecha Ingreso</th>
-                                        <th>Estado Actual</th>
-                                        <th>¿Consumido?</th>
-                                        <th>Detalles</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse($todos as $precinto)
-                                        <tr>
-                                            <td class="ps-4 fw-bold">{{ $precinto->codigo }}</td>
-                                            <td><span class="badge bg-secondary bg-opacity-10 text-secondary">{{ $precinto->tipo }}</span></td>
-                                            <td>{{ $precinto->created_at->format('d/m/Y H:i') }}</td>
-                                            <td>
-                                                @switch($precinto->estado)
-                                                    @case('disponible')
-                                                        <span class="badge bg-success">Disponible</span>
-                                                        @break
-                                                    @case('en_logistica')
-                                                        <span class="badge bg-warning text-dark">En Logística</span>
-                                                        @break
-                                                    @case('usado')
-                                                        <span class="badge bg-primary">Consumido / Usado</span>
-                                                        @break
-                                                    @case('anulado')
-                                                        <span class="badge bg-danger">Anulado</span>
-                                                        @break
-                                                    @default
-                                                        <span class="badge bg-secondary">{{ $precinto->estado }}</span>
-                                                @endswitch
-                                            </td>
-                                            <td>
-                                                @if($precinto->estado == 'usado')
-                                                    <span class="text-success fw-bold"><i class="bi bi-check-circle-fill me-1"></i>SÍ</span>
-                                                @elseif($precinto->estado == 'anulado')
-                                                    <span class="text-danger fw-bold"><i class="bi bi-x-circle-fill me-1"></i>RECHAZADO</span>
-                                                @else
-                                                    <span class="text-muted"><i class="bi bi-circle me-1"></i>NO</span>
-                                                @endif
-                                            </td>
-                                            <td>
-                                                @if($precinto->form_response_id)
-                                                    <a href="{{ route('despacho.show', $precinto->form_response_id) }}" class="btn btn-sm btn-link">Ver Inspección</a>
-                                                @else
-                                                    -
-                                                @endif
-                                            </td>
-                                        </tr>
-                                    @empty
-                                        <tr><td colspan="6" class="text-center py-5 text-muted">No hay registros de precintos.</td></tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="p-3 border-top">
-                            {{ $todos->appends(['q' => $search, 'tab' => 'todos'])->links() }}
-                        </div>
-                    </div>
+                 
                 </div>
             </div>
         </div>

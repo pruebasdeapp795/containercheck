@@ -44,106 +44,113 @@
             </div>
         @endif
 
-        <div class="d-flex justify-content-between align-items-center mb-5">
-            <div>
+        <div class="row align-items-center mb-5 g-3">
+            <div class="col-12 col-md-auto">
                 <h1 class="h3 mb-1">Inventario</h1>
-                <p class="text-muted-custom">Gestiona los precintos</p>
+                <p class="text-muted-custom mb-0">Gestiona los precintos</p>
             </div>
-            <div class="flex-grow-1 mx-4 d-none d-md-block">
-                <form action="{{ route('control-riesgo.inventario') }}" method="GET">
-                    <div class="input-group" style="max-width: 500px;">
-                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
+            <div class="col-12 col-md flex-grow-1">
+                <form action="{{ route('control-riesgo.inventario') }}" method="GET" class="mx-md-4">
+                    <div class="input-group shadow-sm" style="max-width: 500px;">
+                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
                         <input type="text" name="q" class="form-control border-start-0" placeholder="Buscar precinto..." value="{{ $search }}">
                         @if($search)
                             <a href="{{ route('control-riesgo.inventario') }}" class="btn btn-outline-secondary"><i class="bi bi-x-lg"></i></a>
                         @endif
-                        <button class="btn btn-primary" type="submit">Buscar</button>
+                        <button class="btn btn-primary px-4" type="submit">Buscar</button>
                     </div>
                 </form>
             </div>
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPrecintoModal">
-                <i class="bi bi-plus-circle"></i> Agregar Precinto
-            </button>
+            <div class="col-12 col-md-auto">
+                <button class="btn btn-primary w-100 shadow-sm" data-bs-toggle="modal" data-bs-target="#addPrecintoModal">
+                    <i class="bi bi-plus-circle me-1"></i> Agregar Precinto
+                </button>
+            </div>
         </div>
 
         <div class="row g-4 mb-5">
             {{-- Disponibles --}}
-            <div class="col-md-3">
+            <div class="col-6 col-md-3">
                 <div class="card card-custom p-3 border-start border-4 border-success h-100">
                     <div class="d-flex justify-content-between">
                         <i class="bi bi-check-circle-fill text-success fs-4"></i>
-                        <span class="badge bg-success bg-opacity-10 text-success">Listos</span>
+                        <span class="badge bg-success bg-opacity-10 text-success d-none d-sm-inline-block">Listos</span>
                     </div>
                     <div class="mt-3">
-                        <p class="text-muted-custom mb-0 small text-uppercase fw-bold">Disponibles</p>
+                        <p class="text-muted-custom mb-0 small text-uppercase fw-bold" style="font-size: 0.7rem;">Disponibles</p>
                         <div class="stat-value">{{ $disponibles->total() }}</div>
-                        <small class="text-muted">En oficina central</small>
+                        <small class="text-muted small d-block" style="font-size: 0.7rem;">Oficina central</small>
                     </div>
                 </div>
             </div>
 
             {{-- Traslados (En Logística) --}}
-            <div class="col-md-3">
+            <div class="col-6 col-md-3">
                 <div class="card card-custom p-3 border-start border-4 border-warning h-100">
                     <div class="d-flex justify-content-between">
                         <i class="bi bi-truck text-warning fs-4"></i>
-                        <span class="badge bg-warning bg-opacity-10 text-warning">En Tránsito</span>
+                        <span class="badge bg-warning bg-opacity-10 text-warning d-none d-sm-inline-block">En Tránsito</span>
                     </div>
                     <div class="mt-3">
-                        <p class="text-muted-custom mb-0 small text-uppercase fw-bold">Traslados</p>
+                        <p class="text-muted-custom mb-0 small text-uppercase fw-bold" style="font-size: 0.7rem;">Traslados</p>
                         <div class="stat-value">{{ $enLogistica->total() }}</div>
-                        <small class="text-muted">En zona de cargue</small>
+                        <small class="text-muted small d-block" style="font-size: 0.7rem;">Zona de cargue</small>
                     </div>
                 </div>
             </div>
 
             {{-- Ingresados (Total Histórico) --}}
-            <div class="col-md-3">
+            <div class="col-6 col-md-3">
                 <div class="card card-custom p-3 border-start border-4 border-primary h-100">
                     <div class="d-flex justify-content-between">
                         <i class="bi bi-box-seam text-primary fs-4"></i>
-                        <span class="badge bg-primary bg-opacity-10 text-primary">Total</span>
+                        <span class="badge bg-primary bg-opacity-10 text-primary d-none d-sm-inline-block">Total</span>
                     </div>
                     <div class="mt-3">
-                        <p class="text-muted-custom mb-0 small text-uppercase fw-bold">Ingresados</p>
+                        <p class="text-muted-custom mb-0 small text-uppercase fw-bold" style="font-size: 0.7rem;">Ingresados</p>
                         <div class="stat-value">{{ $totalIngresados }}</div>
-                        <small class="text-muted">Total histórico</small>
+                        <small class="text-muted small d-block" style="font-size: 0.7rem;">Historial</small>
                     </div>
                 </div>
             </div>
 
             {{-- Uso Mensual --}}
-            <div class="col-md-3">
+            <div class="col-6 col-md-3">
                 <div class="card card-custom p-3 border-start border-4 border-danger h-100">
                     <div class="d-flex justify-content-between">
                         <i class="bi bi-calendar-check text-danger fs-4"></i>
-                        <span class="badge bg-danger bg-opacity-10 text-danger">Mes Actual</span>
+                        <span class="badge bg-danger bg-opacity-10 text-danger d-none d-sm-inline-block">Mes Actual</span>
                     </div>
                     <div class="mt-3">
-                        <p class="text-muted-custom mb-0 small text-uppercase fw-bold">Uso Mensual</p>
+                        <p class="text-muted-custom mb-0 small text-uppercase fw-bold" style="font-size: 0.7rem;">Uso Mensual</p>
                         <div class="stat-value">{{ $usoMensual }}</div>
-                        <small class="text-muted">Consumidos este mes</small>
+                        <small class="text-muted small d-block" style="font-size: 0.7rem;">Consumidos</small>
                     </div>
                 </div>
             </div>
         </div>
 
         {{-- Section for Type Breakdown with Quick Transfer --}}
-        <div class="d-flex gap-2 mb-4 overflow-auto pb-2">
-            @foreach($disponiblesPorTipo as $disponible)
-                <div class="card card-custom border-0 shadow-sm d-inline-flex flex-row align-items-center p-2 px-3 bg-white">
-                    <div class="me-3">
-                        <span class="bullet bg-success d-inline-block" style="width:8px; height:8px; border-radius:50%;"></span>
-                        <span class="small fw-bold text-muted text-uppercase ms-1">{{ $disponible->tipo }}</span>
-                        <div class="stat-value" style="font-size: 1.1rem;">{{ $disponible->total }} <small class="text-muted fw-normal" style="font-size: 0.7rem">disp.</small></div>
+        <div class="mb-2">
+            <h6 class="text-muted-custom small text-uppercase fw-bold mb-3">Disponibilidad por Tipo</h6>
+            <div class="d-flex gap-2 mb-4 overflow-auto pb-2" style="scrollbar-width: thin;">
+                @foreach($disponiblesPorTipo as $disponible)
+                    <div class="card card-custom border-0 shadow-sm d-flex flex-row align-items-center p-2 px-3 bg-white" style="min-width: 180px;">
+                        <div class="flex-grow-1">
+                            <div class="d-flex align-items-center mb-1">
+                                <span class="bullet bg-success d-inline-block me-1" style="width:8px; height:8px; border-radius:50%;"></span>
+                                <span class="small fw-bold text-muted text-uppercase" style="font-size: 0.65rem;">{{ $disponible->tipo }}</span>
+                            </div>
+                            <div class="stat-value" style="font-size: 1.1rem;">{{ $disponible->total }} <small class="text-muted fw-normal" style="font-size: 0.7rem">disp.</small></div>
+                        </div>
+                        <button class="btn btn-sm btn-warning rounded-pill px-2 py-1 fw-bold ms-2" 
+                                style="font-size: 0.7rem;"
+                                onclick="openTransferModal('{{ $disponible->tipo }}', {{ $disponible->total }}, null)">
+                            <i class="bi bi-truck"></i>
+                        </button>
                     </div>
-                    <button class="btn btn-sm btn-warning rounded-pill px-3 py-1 fw-bold" 
-                            style="font-size: 0.75rem;"
-                            onclick="openTransferModal('{{ $disponible->tipo }}', {{ $disponible->total }}, null)">
-                        <i class="bi bi-truck"></i> Trasladar
-                    </button>
-                </div>
-            @endforeach
+                @endforeach
+            </div>
         </div>
 
         <div class="card card-custom overflow-hidden">

@@ -174,6 +174,61 @@
             height: 12px;
             border-radius: 3px;
         }
+
+        .search-container {
+            max-width: 400px;
+        }
+
+        .input-search {
+            border-radius: 8px 0 0 8px !important;
+            border-right: none;
+        }
+
+        .btn-search {
+            border-radius: 0 8px 8px 0 !important;
+        }
+
+        /* Type-ahead suggestions */
+        .search-wrapper {
+            position: relative;
+        }
+
+        .suggestions-list {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            max-height: 250px;
+            overflow-y: auto;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .suggestion-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-bottom: 1px solid #f8f9fa;
+        }
+
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+
+        .suggestion-item:hover {
+            background-color: #f1f2f6;
+            color: var(--accent-blue);
+        }
+
+        .suggestion-item.active {
+            background-color: var(--accent-blue);
+            color: white;
+        }
     </style>
 </head>
 
@@ -192,16 +247,46 @@
     </nav>
 
     <div class="dashboard-container">
-        <div class="report-header d-flex justify-content-between align-items-end">
+        <div class="report-header d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
             <div>
                 <h1 class="report-title">Reporte de Contenedores Rechazados</h1>
-                <p class="report-subtitle">{{ now()->translatedFormat('F Y') }} - Q{{ ceil(now()->month / 3) }}
+                <p class="report-subtitle mb-0">{{ now()->translatedFormat('F Y') }} - Q{{ ceil(now()->month / 3) }}
                     {{ now()->year }}
                 </p>
             </div>
-            <div>
-                <a href="{{ route('comex.export.csv') }}" class="btn btn-export shadow-sm">
-                    <i class="bi bi-file-earmark-excel me-2"></i> Exportar Excel (CSV)
+
+            <div class="d-flex align-items-center gap-3 flex-wrap flex-grow-1 justify-content-end">
+                <div class="search-container flex-grow-1" style="max-width: 500px;">
+                    <form action="{{ route('comex.index') }}" method="GET" id="searchForm"
+                        class="input-group search-wrapper">
+                        <span class="input-group-text bg-white border-end-0" style="border-radius: 8px 0 0 8px;">
+                            <i class="bi bi-buildings text-muted"></i>
+                        </span>
+                        <input type="text" name="company" id="companyInput" autofocus
+                            class="form-control border-start-0 ps-0 input-search"
+                            placeholder="Buscar transportadora (Escribe para sugerencias)..."
+                            value="{{ $companySearch }}" autocomplete="off">
+                        <button class="btn btn-primary btn-search px-4" type="submit">
+                            Buscar
+                        </button>
+                        <div id="suggestions" class="suggestions-list"></div>
+                    </form>
+                    @if ($companySearch)
+                        <div class="mt-1 d-flex align-items-center gap-2">
+                            <span class="badge bg-soft-red text-danger border border-danger-subtle px-2 py-1"
+                                style="font-weight: 500;">
+                                <i class="bi bi-filter me-1"></i> Filtrando por: {{ $companySearch }}
+                            </span>
+                            <a href="{{ route('comex.index') }}" class="text-muted small text-decoration-none hover-danger">
+                                <i class="bi bi-x-circle"></i> Limpiar filtro
+                            </a>
+                        </div>
+                    @endif
+                </div>
+
+                <a href="{{ route('comex.export.csv', ['company' => $companySearch]) }}"
+                    class="btn btn-export shadow-sm">
+                    <i class="bi bi-file-earmark-excel me-2"></i> Exportar
                 </a>
             </div>
         </div>
@@ -238,7 +323,7 @@
                                 <canvas id="causasChart" style="max-height: 180px;"></canvas>
                             </div>
                             <div class="col-6">
-                                <div class="stat-label text-center mb-2">Clientes Críticos</div>
+                                <div class="stat-label text-center mb-2">Transportadoras Críticas</div>
                                 <canvas id="autoridadChart" style="max-height: 180px;"></canvas>
                             </div>
                         </div>
@@ -249,7 +334,7 @@
             <!-- Charts Column -->
             <div class="col-lg-7">
                 <div class="card">
-                    <div class="card-header-custom">Rechazos por Cliente</div>
+                    <div class="card-header-custom">Rechazos por Transportadora</div>
                     <div class="chart-container">
                         <canvas id="origenChart"></canvas>
                     </div>
@@ -258,7 +343,9 @@
         </div>
 
         <div class="card table-card">
-            <div class="card-header-custom">Detalle de Contenedores Inspeccionados</div>
+            <div class="card-header-custom">
+                Detalle de Contenedores Inspeccionados
+            </div>
             <div class="table-responsive">
                 <table class="table table-hover mb-0">
                     <thead>
@@ -266,7 +353,7 @@
                             <th>Folio</th>
                             <th>Contenedor</th>
                             <th>Fecha</th>
-                            <th>Cliente</th>
+                            <th>Transportadora</th>
                             <th>Inspector</th>
                             <th>Motivo de Rechazo</th>
                         </tr>
@@ -277,7 +364,7 @@
                                 <td><span class="fw-bold">#{{ $ins->id }}</span></td>
                                 <td>{{ $ins->getContainerNumber() }}</td>
                                 <td>{{ $ins->updated_at->format('d/m/Y H:i') }}</td>
-                                <td>{{ $ins->getFieldValue('Cliente') ?? 'N/A' }}</td>
+                                <td>{{ $ins->getFieldValue('Transportadora') ?? 'N/A' }}</td>
                                 <td>
                                     {{ $ins->user->name ?? 'N/A' }}<br>
                                     <small class="text-muted">Rechazado por:
@@ -322,7 +409,7 @@
             }
         });
 
-        // Top Clients Chart (Donut)
+        // Top Transportadoras Chart (Donut)
         new Chart(document.getElementById('autoridadChart'), {
             type: 'doughnut',
             data: {
@@ -400,6 +487,80 @@
                 scales: {
                     y: { beginAtZero: true, grid: { color: '#f1f2f6' } },
                     x: { grid: { display: false } }
+                }
+            }
+        });
+
+        // Type-ahead Logic
+        const companyInput = document.getElementById('companyInput');
+        const suggestionsDiv = document.getElementById('suggestions');
+        const searchForm = document.getElementById('searchForm');
+        let debounceTimer;
+
+        companyInput.addEventListener('input', function () {
+            clearTimeout(debounceTimer);
+            const query = this.value;
+
+            if (query.length < 2) {
+                suggestionsDiv.style.display = 'none';
+                return;
+            }
+
+            debounceTimer = setTimeout(() => {
+                fetch(`{{ route('comex.api.searchCompanies') }}?q=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.length > 0) {
+                            suggestionsDiv.innerHTML = '';
+                            data.forEach(company => {
+                                const div = document.createElement('div');
+                                div.className = 'suggestion-item';
+                                div.textContent = company;
+                                div.addEventListener('click', () => {
+                                    companyInput.value = company;
+                                    suggestionsDiv.style.display = 'none';
+                                    searchForm.submit();
+                                });
+                                suggestionsDiv.appendChild(div);
+                            });
+                            suggestionsDiv.style.display = 'block';
+                        } else {
+                            suggestionsDiv.style.display = 'none';
+                        }
+                    });
+            }, 300);
+        });
+
+        // Close suggestions when clicking outside
+        document.addEventListener('click', function (e) {
+            if (!companyInput.contains(e.target) && !suggestionsDiv.contains(e.target)) {
+                suggestionsDiv.style.display = 'none';
+            }
+        });
+
+        // Navigate with keyboard
+        companyInput.addEventListener('keydown', function (e) {
+            const items = suggestionsDiv.getElementsByClassName('suggestion-item');
+            if (items.length === 0 || suggestionsDiv.style.display === 'none') return;
+
+            let activeIndex = Array.from(items).findIndex(item => item.classList.contains('active'));
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (activeIndex < items.length - 1) {
+                    if (activeIndex >= 0) items[activeIndex].classList.remove('active');
+                    items[activeIndex + 1].classList.add('active');
+                }
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (activeIndex > 0) {
+                    items[activeIndex].classList.remove('active');
+                    items[activeIndex - 1].classList.add('active');
+                }
+            } else if (e.key === 'Enter') {
+                if (activeIndex >= 0) {
+                    e.preventDefault();
+                    items[activeIndex].click();
                 }
             }
         });

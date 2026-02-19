@@ -139,6 +139,7 @@ Route::middleware(['auth', 'role:despacho'])->prefix('despacho')->name('despacho
 Route::middleware(['auth', 'role:comex'])->prefix('comex')->name('comex.')->group(function () {
     Route::get('/index', [\App\Http\Controllers\ComexController::class, 'index'])->name('index');
     Route::get('/export/csv', [\App\Http\Controllers\ComexController::class, 'exportCsv'])->name('export.csv');
+    Route::get('/api/search-companies', [\App\Http\Controllers\ComexController::class, 'searchCompanies'])->name('api.searchCompanies');
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

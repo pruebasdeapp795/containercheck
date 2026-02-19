@@ -7,13 +7,23 @@ use App\Models\FormResponse;
 
 class ComexController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // Get all rejected inspections
-        $rejectedInspections = FormResponse::where('status', 'rejected')
-            ->with(['user', 'monitoreoUser'])
-            ->orderBy('updated_at', 'desc')
-            ->get();
+        $companySearch = $request->input('company');
+
+        $query = FormResponse::where('status', 'rejected')
+            ->with(['user', 'monitoreoUser']);
+
+        if ($companySearch) {
+            $query->whereHas('fieldResponses', function ($q) use ($companySearch) {
+                $q->where('value', 'like', "%{$companySearch}%")
+                    ->whereHas('field', function ($f) {
+                        $f->where('label', 'Transportadora');
+                    });
+            });
+        }
+
+        $rejectedInspections = $query->orderBy('updated_at', 'desc')->get();
 
         // Stats
         $totalRejected = $rejectedInspections->count();
@@ -52,10 +62,10 @@ class ComexController extends Controller
             }
         }
 
-        // Top Clients/Transportadoras for "Origin/Destination" chart
+        // Top Transportadoras for "Origin/Destination" chart
         $clientsData = [];
         foreach ($rejectedInspections as $ins) {
-            $client = $ins->getFieldValue('Cliente') ?? 'Desconocido';
+            $client = $ins->getFieldValue('Transportadora') ?? 'Desconocido';
             $clientsData[$client] = ($clientsData[$client] ?? 0) + 1;
         }
         arsort($clientsData);
@@ -67,16 +77,28 @@ class ComexController extends Controller
             'rejectionRate',
             'monthlyTrend',
             'reasons',
-            'topClients'
+            'topClients',
+            'companySearch'
         ));
     }
 
-    public function exportCsv()
+    public function exportCsv(Request $request)
     {
-        $rejectedInspections = FormResponse::where('status', 'rejected')
-            ->with(['user', 'monitoreoUser'])
-            ->orderBy('updated_at', 'desc')
-            ->get();
+        $companySearch = $request->input('company');
+
+        $query = FormResponse::where('status', 'rejected')
+            ->with(['user', 'monitoreoUser']);
+
+        if ($companySearch) {
+            $query->whereHas('fieldResponses', function ($q) use ($companySearch) {
+                $q->where('value', 'like', "%{$companySearch}%")
+                    ->whereHas('field', function ($f) {
+                        $f->where('label', 'Transportadora');
+                    });
+            });
+        }
+
+        $rejectedInspections = $query->orderBy('updated_at', 'desc')->get();
 
         $filename = "reporte_rechazados_" . date('Y-m-d_H-i-s') . ".csv";
         $headers = [
@@ -92,14 +114,14 @@ class ComexController extends Controller
             // UTF-8 BOM for Excel
             fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
 
-            fputcsv($file, ['ID', 'Fecha', 'Contenedor', 'Cliente', 'Inspector', 'Motivo Rechazo', 'Rechazado Por']);
+            fputcsv($file, ['ID', 'Fecha', 'Contenedor', 'Transportadora', 'Inspector', 'Motivo Rechazo', 'Rechazado Por']);
 
             foreach ($rejectedInspections as $ins) {
                 fputcsv($file, [
                     $ins->id,
                     $ins->updated_at->format('d/m/Y H:i'),
                     $ins->getContainerNumber(),
-                    $ins->getFieldValue('Cliente') ?? 'N/A',
+                    $ins->getFieldValue('Transportadora') ?? 'N/A',
                     $ins->user->name ?? 'N/A',
                     $ins->getRejectionReason(),
                     $ins->monitoreoUser->name ?? 'incumplimiento de la norma'
@@ -109,5 +131,27 @@ class ComexController extends Controller
         };
 
         return response()->stream($callback, 200, $headers);
+    }
+
+    public function searchCompanies(Request $request)
+    {
+        $query = $request->get('q');
+        if (empty($query)) {
+            return response()->json([]);
+        }
+
+        // Search unique customer names from rejected inspections
+        $companies = \App\Models\FieldResponse::whereHas('field', function ($q) {
+            $q->where('label', 'Transportadora');
+        })
+            ->whereHas('formResponse', function ($q) {
+                $q->where('status', 'rejected');
+            })
+            ->where('value', 'LIKE', "%{$query}%")
+            ->distinct()
+            ->take(10)
+            ->pluck('value');
+
+        return response()->json($companies);
     }
 }
